@@ -1,11 +1,12 @@
 -- ============================================================
--- RITUAL HUB V3.0 | DELTA EXECUTOR | BLACK & GOLD THEME
+-- RITUAL HUB V3.1 | DELTA EXECUTOR | BLACK & GOLD THEME
 -- MADE BY: RITUALZ999
 -- ============================================================
 -- FIXES:
--- ✅ Crown button stays visible (fixed disappearing)
--- ✅ FOV Slider works properly
+-- ✅ All sliders work properly (FOV, Max Range, etc.)
 -- ✅ Silent Aim with working FOV Circle
+-- ✅ Original full GUI layout restored
+-- ✅ Crown button (pinky tip size - slightly bigger)
 -- ✅ Discord tags: ritualz999 & rayo06996
 -- ============================================================
 
@@ -16,9 +17,6 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
 local CoreGui = game:GetService("CoreGui")
-
-local VirtualInputManager = nil
-pcall(function() VirtualInputManager = game:GetService("VirtualInputManager") end)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -39,6 +37,7 @@ local GOLD = Color3.fromRGB(255, 215, 0)
 local DARK_GOLD = Color3.fromRGB(184, 134, 11)
 local BLACK = Color3.fromRGB(0, 0, 0)
 local DARK_BG = Color3.fromRGB(8, 8, 8)
+local PANEL_BG = Color3.fromRGB(10, 10, 10)
 local TEXT_WHITE = Color3.fromRGB(255, 255, 255)
 local RITUAL_RED = Color3.fromRGB(180, 20, 20)
 
@@ -75,7 +74,6 @@ local LockOn = false
 local TeamCheck = false
 local IgnoreSafeZone = true
 local IgnorePvPOff = true
-
 local currentTarget = nil
 local targetPosition = nil
 local lockedTarget = nil
@@ -85,11 +83,16 @@ local lockedTarget = nil
 -- ============================================================
 function IsAlly(target)
     local main = player:FindFirstChild("PlayerGui") and player.PlayerGui:FindFirstChild("Main")
-    local frame = main and main:FindFirstChild("Allies")
-        and main.Allies:FindFirstChild("Container")
-        and main.Allies.Container:FindFirstChild("Allies")
-        and main.Allies.Container.Allies:FindFirstChild("ScrollingFrame")
-        and main.Allies.Container.Allies.ScrollingFrame:FindFirstChild("Frame")
+    if not main then return false end
+    local allies = main:FindFirstChild("Allies")
+    if not allies then return false end
+    local container = allies:FindFirstChild("Container")
+    if not container then return false end
+    local allyFrame = container:FindFirstChild("Allies")
+    if not allyFrame then return false end
+    local scroll = allyFrame:FindFirstChild("ScrollingFrame")
+    if not scroll then return false end
+    local frame = scroll:FindFirstChild("Frame")
     if not frame then return false end
     return frame:FindFirstChild(target.Name) ~= nil
 end
@@ -105,23 +108,14 @@ function IsEnemy(target)
 end
 
 function IsPvPOff(target)
-    local attr = target:GetAttribute("PvpDisabled")
-    if attr ~= nil then return attr == true end
+    pcall(function()
+        local attr = target:GetAttribute("PvpDisabled")
+        if attr ~= nil then return attr == true end
+    end)
     local main = target.PlayerGui and target.PlayerGui:FindFirstChild("Main")
     if main then
         local dis = main:FindFirstChild("PvpDisabled")
         if dis then return dis.Visible == true end
-        local pvp = main:FindFirstChild("Pvp")
-        if pvp then
-            local frame = pvp:FindFirstChild("Frame")
-            if frame then
-                local btn = frame:FindFirstChild("PvpButton") or frame:FindFirstChildOfClass("TextButton")
-                if btn and btn:IsA("TextButton") then
-                    local txt = tostring(btn.Text or ""):upper()
-                    if txt:find("OFF") then return true end
-                end
-            end
-        end
     end
     return false
 end
@@ -188,8 +182,7 @@ function GetTargetInFOV()
     local viewportSize = cam and cam.ViewportSize
     if not viewportSize then return nil end
 
-    -- If we have a locked target and LockOn is enabled
-    if LockOn and lockedTarget and lockedTarget.Parent and lockedTarget.Parent:FindFirstChild("Humanoid") then
+    if LockOn and lockedTarget and lockedTarget.Parent then
         local hum = lockedTarget.Parent:FindFirstChildOfClass("Humanoid")
         if hum and hum.Health > 0 then
             local screenPos, onScreen = cam:WorldToViewportPoint(lockedTarget.Position)
@@ -231,13 +224,11 @@ function GetTargetInFOV()
         end
         if not targetPart then return end
 
-        -- Wall check
         if not IsTargetVisible(targetPart) then return end
 
         local worldDist = (targetPart.Position - myHRP.Position).Magnitude
         if worldDist > shortestDist then return end
 
-        -- Check if target is within FOV
         local screenPos, onScreen = cam:WorldToViewportPoint(targetPart.Position)
         if not onScreen then return end
         
@@ -245,7 +236,6 @@ function GetTargetInFOV()
         local screenDist = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
         
         if screenDist <= fovRadius then
-            -- Prediction
             if Prediction then
                 local velocity = hum:GetVelocity()
                 if velocity and velocity.Magnitude > 5 then
@@ -284,13 +274,8 @@ function GetTargetInFOV()
     if SilentAimNPCs then
         local enemies = workspace:FindFirstChild("Enemies")
         if enemies then
-            for _, enemy in ipairs(enemies:GetChildren()) do
+            for _, enemy in pairs(enemies:GetChildren()) do
                 checkTarget(enemy)
-            end
-        end
-        for _, obj in ipairs(workspace:GetChildren()) do
-            if obj:IsA("Model") and obj ~= myChar and obj:FindFirstChildOfClass("Humanoid") then
-                checkTarget(obj)
             end
         end
     end
@@ -475,7 +460,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- ============================================================
--- CROWN TOGGLE BUTTON
+-- CROWN TOGGLE BUTTON (Pinky Tip Size - Slightly Bigger)
 -- ============================================================
 local crownToggleGui = Instance.new("ScreenGui")
 crownToggleGui.Name = "RitualCrownToggle"
@@ -484,13 +469,13 @@ crownToggleGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 crownToggleGui.Parent = playerGui or CoreGui
 
 local crownButton = Instance.new("TextButton")
-crownButton.Size = UDim2.new(0, 28, 0, 28)
-crownButton.Position = UDim2.new(0.01, 0, 0.5, -14)
+crownButton.Size = UDim2.new(0, 32, 0, 32) -- Pinky tip size
+crownButton.Position = UDim2.new(0.01, 0, 0.5, -16)
 crownButton.BackgroundColor3 = BLACK
 crownButton.BackgroundTransparency = 0.15
 crownButton.Text = "👑"
 crownButton.Font = Enum.Font.GothamBold
-crownButton.TextSize = 16
+crownButton.TextSize = 18
 crownButton.TextColor3 = GOLD
 crownButton.Active = true
 crownButton.Draggable = true
@@ -516,7 +501,7 @@ crownButton.MouseButton1Click:Connect(function()
 end)
 
 -- ============================================================
--- CREATE MAIN UI
+-- CREATE MAIN UI (ORIGINAL FULL LAYOUT)
 -- ============================================================
 screenGui = Instance.new("ScreenGui")
 screenGui.Name = "RitualUI"
@@ -526,8 +511,8 @@ screenGui.Parent = playerGui or CoreGui
 
 mainFrame = Instance.new("Frame")
 mainFrame.Name = "RitualMainFrame"
-mainFrame.Size = UDim2.new(0, 420, 0, 340)
-mainFrame.Position = UDim2.new(0.5, -210, 0.5, -170)
+mainFrame.Size = UDim2.new(0, 480, 0, 340)
+mainFrame.Position = UDim2.new(0.5, -240, 0.5, -170)
 mainFrame.BackgroundColor3 = BLACK
 mainFrame.BackgroundTransparency = 0
 mainFrame.Visible = false
@@ -622,24 +607,77 @@ minBtn.MouseButton1Click:Connect(function()
     crownButton.Visible = true
 end)
 
--- ============================================================
--- SCROLLING FRAME FOR CONTENT
--- ============================================================
-local scrollFrame = Instance.new("ScrollingFrame", mainFrame)
-scrollFrame.Size = UDim2.new(1, -16, 1, -90)
-scrollFrame.Position = UDim2.new(0, 8, 0, 86)
-scrollFrame.BackgroundTransparency = 1
-scrollFrame.BorderSizePixel = 0
-scrollFrame.ScrollBarThickness = 3
-scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 700)
+-- SIDEBAR
+local sidebar = Instance.new("Frame", mainFrame)
+sidebar.Size = UDim2.new(0, 100, 1, 0)
+sidebar.Position = UDim2.new(0, 0, 0, 42)
+sidebar.BackgroundColor3 = BLACK
+sidebar.BackgroundTransparency = 0.5
+sidebar.BorderSizePixel = 0
 
-local layout = Instance.new("UIListLayout", scrollFrame)
-layout.Padding = UDim.new(0, 6)
-layout.SortOrder = Enum.SortOrder.LayoutOrder
+local sidebarStroke = Instance.new("UIStroke", sidebar)
+sidebarStroke.Color = GOLD
+sidebarStroke.Thickness = 1
+sidebarStroke.Transparency = 0.5
+
+-- SIDEBAR BUTTONS
+local function createSidebarButton(text, yPos, callback)
+    local btn = Instance.new("TextButton", sidebar)
+    btn.Size = UDim2.new(1, -12, 0, 28)
+    btn.Position = UDim2.new(0, 6, 0, yPos)
+    btn.BackgroundColor3 = BLACK
+    btn.BackgroundTransparency = 1
+    btn.Text = text
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 10
+    btn.TextColor3 = TEXT_WHITE
+    btn.TextXAlignment = Enum.TextXAlignment.Left
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
+    
+    local btnStroke = Instance.new("UIStroke", btn)
+    btnStroke.Color = GOLD
+    btnStroke.Thickness = 1
+    btnStroke.Transparency = 0.5
+    
+    btn.MouseButton1Click:Connect(function()
+        callback()
+    end)
+    return btn
+end
+
+-- CONTENT FRAME
+local contentFrame = Instance.new("Frame", mainFrame)
+contentFrame.Size = UDim2.new(1, -100, 1, -42)
+contentFrame.Position = UDim2.new(0, 100, 0, 42)
+contentFrame.BackgroundTransparency = 1
+contentFrame.ClipsDescendants = true
+
+local contentScroll = Instance.new("ScrollingFrame", contentFrame)
+contentScroll.Size = UDim2.new(1, 0, 1, 0)
+contentScroll.BackgroundTransparency = 1
+contentScroll.BorderSizePixel = 0
+contentScroll.ScrollBarThickness = 3
+contentScroll.CanvasSize = UDim2.new(0, 0, 0, 700)
+
+local contentLayout = Instance.new("UIListLayout", contentScroll)
+contentLayout.Padding = UDim.new(0, 8)
+contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
 -- ============================================================
--- TOGGLE HELPER
+-- HELPERS FOR UI ELEMENTS
 -- ============================================================
+local function createSection(title)
+    local lbl = Instance.new("TextLabel", contentScroll)
+    lbl.Size = UDim2.new(1, 0, 0, 24)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = "⚜️ " .. title
+    lbl.Font = Enum.Font.GothamBlack
+    lbl.TextSize = 13
+    lbl.TextColor3 = GOLD
+    lbl.TextXAlignment = Enum.TextXAlignment.Center
+    return lbl
+end
+
 local function createToggle(parent, label, default, callback)
     local frame = Instance.new("Frame", parent)
     frame.Size = UDim2.new(1, -8, 0, 24)
@@ -680,59 +718,69 @@ local function createToggle(parent, label, default, callback)
     return btn
 end
 
--- ============================================================
--- CREATE SLIDER HELPER (WORKING)
--- ============================================================
 local function createSlider(parent, label, default, min, max, callback)
     local frame = Instance.new("Frame", parent)
-    frame.Size = UDim2.new(1, -8, 0, 40)
+    frame.Size = UDim2.new(1, -8, 0, 44)
     frame.BackgroundTransparency = 1
     
     local lbl = Instance.new("TextLabel", frame)
-    lbl.Size = UDim2.new(1, 0, 0, 16)
+    lbl.Size = UDim2.new(1, 0, 0, 18)
     lbl.BackgroundTransparency = 1
     lbl.Text = label .. ": " .. tostring(default)
     lbl.Font = Enum.Font.GothamBold
     lbl.TextSize = 9
     lbl.TextColor3 = GOLD
     
+    local value = default
+    
     local sliderBg = Instance.new("Frame", frame)
-    sliderBg.Size = UDim2.new(1, 0, 0, 14)
-    sliderBg.Position = UDim2.new(0, 0, 0, 18)
+    sliderBg.Size = UDim2.new(1, 0, 0, 16)
+    sliderBg.Position = UDim2.new(0, 0, 0, 22)
     sliderBg.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-    Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(0, 4)
+    sliderBg.BackgroundTransparency = 0.5
+    Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(0, 6)
     
     local sliderFill = Instance.new("Frame", sliderBg)
     sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
     sliderFill.BackgroundColor3 = GOLD
     sliderFill.BackgroundTransparency = 0.3
-    Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(0, 4)
+    Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(0, 6)
     
     local sliderHandle = Instance.new("TextButton", sliderBg)
-    sliderHandle.Size = UDim2.new(0, 14, 0, 14)
-    sliderHandle.Position = UDim2.new((default - min) / (max - min), -7, 0.5, -7)
+    sliderHandle.Size = UDim2.new(0, 16, 0, 16)
+    sliderHandle.Position = UDim2.new((default - min) / (max - min), -8, 0, 0)
     sliderHandle.BackgroundColor3 = GOLD
+    sliderHandle.BackgroundTransparency = 0
     sliderHandle.Text = ""
+    sliderHandle.ZIndex = 2
     Instance.new("UICorner", sliderHandle).CornerRadius = UDim.new(1, 0)
+    local handleStroke = Instance.new("UIStroke", sliderHandle)
+    handleStroke.Color = TEXT_WHITE
+    handleStroke.Thickness = 1.5
     
     local dragging = false
-    local value = default
     
-    sliderHandle.MouseButton1Down:Connect(function() dragging = true end)
-    sliderHandle.MouseButton1Up:Connect(function() dragging = false end)
+    sliderHandle.MouseButton1Down:Connect(function()
+        dragging = true
+    end)
+    sliderHandle.MouseButton1Up:Connect(function()
+        dragging = false
+    end)
     
     UserInputService.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
             local absPos = sliderBg.AbsolutePosition
             local absSize = sliderBg.AbsoluteSize
-            local rel = math.clamp((input.Position.X - absPos.X) / absSize.X, 0, 1)
-            value = math.floor(min + rel * (max - min))
-            value = math.clamp(value, min, max)
-            
-            sliderFill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
-            sliderHandle.Position = UDim2.new((value - min) / (max - min), -7, 0.5, -7)
-            lbl.Text = label .. ": " .. tostring(value)
-            if callback then callback(value) end
+            if absSize.X > 0 then
+                local rel = math.clamp((input.Position.X - absPos.X) / absSize.X, 0, 1)
+                value = math.floor(min + rel * (max - min))
+                value = math.clamp(value, min, max)
+                
+                sliderFill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
+                sliderHandle.Position = UDim2.new((value - min) / (max - min), -8, 0, 0)
+                lbl.Text = label .. ": " .. tostring(value)
+                if callback then callback(value) end
+            end
         end
     end)
     
@@ -740,36 +788,28 @@ local function createSlider(parent, label, default, min, max, callback)
 end
 
 -- ============================================================
--- SILENT AIM SECTION
+-- POPULATE UI
 -- ============================================================
-local sectionLabel = Instance.new("TextLabel", scrollFrame)
-sectionLabel.Size = UDim2.new(1, 0, 0, 20)
-sectionLabel.BackgroundTransparency = 1
-sectionLabel.Text = "⚜️ SILENT AIM"
-sectionLabel.Font = Enum.Font.GothamBlack
-sectionLabel.TextSize = 13
-sectionLabel.TextColor3 = GOLD
 
--- Enable Silent Aim
-createToggle(scrollFrame, "Silent Aim", false, function(v)
+-- Silent Aim Section
+createSection("SILENT AIM")
+
+createToggle(contentScroll, "Silent Aim", false, function(v)
     SilentAimEnabled = v
     if FOVCircle then
         FOVCircle.Visible = v and ShowFOVCircle
     end
 end)
 
--- Target Players
-createToggle(scrollFrame, "Target Players", false, function(v)
+createToggle(contentScroll, "Target Players", false, function(v)
     SilentAimPlayers = v
 end)
 
--- Target NPCs
-createToggle(scrollFrame, "Target NPCs", false, function(v)
+createToggle(contentScroll, "Target NPCs", false, function(v)
     SilentAimNPCs = v
 end)
 
--- Show FOV Circle
-createToggle(scrollFrame, "Show FOV Circle", false, function(v)
+createToggle(contentScroll, "Show FOV Circle", false, function(v)
     ShowFOVCircle = v
     if FOVCircle then
         FOVCircle.Visible = SilentAimEnabled and v
@@ -777,60 +817,87 @@ createToggle(scrollFrame, "Show FOV Circle", false, function(v)
 end)
 
 -- FOV SLIDER (WORKING)
-createSlider(scrollFrame, "FOV Radius", 150, 30, 500, function(v)
+createSlider(contentScroll, "FOV Radius", 150, 30, 500, function(v)
     FOVRadius = v
     if FOVCircle then
         FOVCircle.Radius = v
     end
 end)
 
--- Headshot Only
-createToggle(scrollFrame, "Headshot Only", false, function(v)
+createToggle(contentScroll, "Headshot Only", false, function(v)
     HeadshotOnly = v
 end)
 
--- Wall Check
-createToggle(scrollFrame, "Wall Check", false, function(v)
+createToggle(contentScroll, "Wall Check", false, function(v)
     WallCheck = v
 end)
 
--- Prediction
-createToggle(scrollFrame, "Prediction", false, function(v)
+createToggle(contentScroll, "Prediction", false, function(v)
     Prediction = v
 end)
 
--- Lock On
-createToggle(scrollFrame, "Lock On", false, function(v)
+createToggle(contentScroll, "Lock On", false, function(v)
     LockOn = v
     if not v then lockedTarget = nil end
 end)
 
--- Team Check
-createToggle(scrollFrame, "Team Check", false, function(v)
+createToggle(contentScroll, "Team Check", false, function(v)
     TeamCheck = v
 end)
 
--- Ignore Safe Zone
-createToggle(scrollFrame, "Ignore Safe Zone", true, function(v)
+createToggle(contentScroll, "Ignore Safe Zone", true, function(v)
     IgnoreSafeZone = v
 end)
 
--- Ignore PvP OFF
-createToggle(scrollFrame, "Ignore PvP OFF", true, function(v)
+createToggle(contentScroll, "Ignore PvP OFF", true, function(v)
     IgnorePvPOff = v
 end)
 
 -- Max Range Slider
-createSlider(scrollFrame, "Max Range", 2500, 100, 5000, function(v)
+createSlider(contentScroll, "Max Range", 2500, 100, 5000, function(v)
     MaxRange = v
 end)
 
--- ============================================================
--- STATUS DISPLAY
--- ============================================================
-local statusLabel = Instance.new("TextLabel", scrollFrame)
-statusLabel.Size = UDim2.new(1, 0, 0, 20)
-statusLabel.Position = UDim2.new(0, 0, 0, 400)
+-- Target Part Selector
+local partFrame = Instance.new("Frame", contentScroll)
+partFrame.Size = UDim2.new(1, -8, 0, 30)
+partFrame.BackgroundTransparency = 1
+
+local partLabel = Instance.new("TextLabel", partFrame)
+partLabel.Size = UDim2.new(0.5, 0, 1, 0)
+partLabel.BackgroundTransparency = 1
+partLabel.Text = "Target Part:"
+partLabel.Font = Enum.Font.GothamBold
+partLabel.TextSize = 10
+partLabel.TextColor3 = TEXT_WHITE
+partLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local partBtn = Instance.new("TextButton", partFrame)
+partBtn.Size = UDim2.new(0.4, 0, 1, 0)
+partBtn.Position = UDim2.new(0.6, 0, 0, 0)
+partBtn.BackgroundColor3 = BLACK
+partBtn.BackgroundTransparency = 0.5
+partBtn.Text = "HumanoidRootPart"
+partBtn.Font = Enum.Font.GothamBold
+partBtn.TextSize = 9
+partBtn.TextColor3 = GOLD
+Instance.new("UICorner", partBtn).CornerRadius = UDim.new(0, 4)
+local pStroke = Instance.new("UIStroke", partBtn)
+pStroke.Color = GOLD
+pStroke.Thickness = 1
+
+local partOptions = {"HumanoidRootPart", "Head", "UpperTorso", "LowerTorso"}
+local partIndex = 1
+
+partBtn.MouseButton1Click:Connect(function()
+    partIndex = (partIndex % #partOptions) + 1
+    SilentAimPart = partOptions[partIndex]
+    partBtn.Text = partOptions[partIndex]
+end)
+
+-- Status
+local statusLabel = Instance.new("TextLabel", contentScroll)
+statusLabel.Size = UDim2.new(1, 0, 0, 24)
 statusLabel.BackgroundTransparency = 1
 statusLabel.Text = "Status: Ready"
 statusLabel.Font = Enum.Font.GothamBold
@@ -838,40 +905,41 @@ statusLabel.TextSize = 10
 statusLabel.TextColor3 = DARK_GOLD
 statusLabel.TextXAlignment = Enum.TextXAlignment.Center
 
--- Update status
 RunService.Heartbeat:Connect(function()
     if SilentAimEnabled and currentTarget then
-        statusLabel.Text = "Status: Locked on target"
+        statusLabel.Text = "✅ Locked on target"
         statusLabel.TextColor3 = GOLD
     elseif SilentAimEnabled then
-        statusLabel.Text = "Status: No target in FOV"
+        statusLabel.Text = "⏳ No target in FOV"
         statusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
     else
-        statusLabel.Text = "Status: Disabled"
+        statusLabel.Text = "⏸ Disabled"
         statusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
     end
 end)
 
 -- ============================================================
--- SAVE/LOAD CONFIG
+-- SIDEBAR NAVIGATION
 -- ============================================================
-local configData = {
-    SilentAimEnabled = false,
-    SilentAimPlayers = false,
-    SilentAimNPCs = false,
-    ShowFOVCircle = false,
-    FOVRadius = 150,
-    MaxRange = 2500,
-    HeadshotOnly = false,
-    WallCheck = false,
-    Prediction = false,
-    LockOn = false,
-    TeamCheck = false,
-    IgnoreSafeZone = true,
-    IgnorePvPOff = true
-}
+local currentContent = contentScroll
 
-function SaveConfig()
+local function switchTab(newContent)
+    currentContent.Visible = false
+    currentContent = newContent
+    currentContent.Visible = true
+end
+
+-- Create sidebar buttons
+local btnY = 10
+local btn1 = createSidebarButton("Silent Aim", btnY, function()
+    switchTab(contentScroll)
+end)
+btnY = btnY + 32
+
+-- ============================================================
+-- SAVE/LOAD
+-- ============================================================
+local function SaveConfig()
     local data = {
         SilentAimEnabled = SilentAimEnabled,
         SilentAimPlayers = SilentAimPlayers,
@@ -885,7 +953,8 @@ function SaveConfig()
         LockOn = LockOn,
         TeamCheck = TeamCheck,
         IgnoreSafeZone = IgnoreSafeZone,
-        IgnorePvPOff = IgnorePvPOff
+        IgnorePvPOff = IgnorePvPOff,
+        SilentAimPart = SilentAimPart
     }
     pcall(function()
         if writefile then
@@ -894,7 +963,7 @@ function SaveConfig()
     end)
 end
 
-function LoadConfig()
+local function LoadConfig()
     pcall(function()
         if isfile and readfile and isfile("RitualHub_Config.json") then
             local str = readfile("RitualHub_Config.json")
@@ -913,16 +982,19 @@ function LoadConfig()
                 if data.TeamCheck ~= nil then TeamCheck = data.TeamCheck end
                 if data.IgnoreSafeZone ~= nil then IgnoreSafeZone = data.IgnoreSafeZone end
                 if data.IgnorePvPOff ~= nil then IgnorePvPOff = data.IgnorePvPOff end
+                if data.SilentAimPart ~= nil then SilentAimPart = data.SilentAimPart end
             end
         end
     end)
 end
 
--- ============================================================
--- SAVE/LOAD BUTTONS
--- ============================================================
-local saveBtn = Instance.new("TextButton", scrollFrame)
-saveBtn.Size = UDim2.new(0.45, -4, 0, 28)
+-- Save/Load buttons at bottom
+local btnFrame = Instance.new("Frame", contentScroll)
+btnFrame.Size = UDim2.new(1, -8, 0, 32)
+btnFrame.BackgroundTransparency = 1
+
+local saveBtn = Instance.new("TextButton", btnFrame)
+saveBtn.Size = UDim2.new(0.45, -4, 1, 0)
 saveBtn.Position = UDim2.new(0, 0, 0, 0)
 saveBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 saveBtn.BackgroundTransparency = 0.5
@@ -935,8 +1007,8 @@ local sStroke = Instance.new("UIStroke", saveBtn)
 sStroke.Color = GOLD
 sStroke.Thickness = 1
 
-local loadBtn = Instance.new("TextButton", scrollFrame)
-loadBtn.Size = UDim2.new(0.45, -4, 0, 28)
+local loadBtn = Instance.new("TextButton", btnFrame)
+loadBtn.Size = UDim2.new(0.45, -4, 1, 0)
 loadBtn.Position = UDim2.new(0.55, 0, 0, 0)
 loadBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 loadBtn.BackgroundTransparency = 0.5
@@ -978,13 +1050,13 @@ task.delay(0.5, function()
         FOVCircle.Visible = SilentAimEnabled and ShowFOVCircle
         FOVCircle.Radius = FOVRadius
     end
+    
+    -- Update part button
+    partBtn.Text = SilentAimPart
 end)
 
--- ============================================================
--- PRINT STATUS
--- ============================================================
-print("⚜️ RITUAL HUB V3.0 LOADED | BLACK & GOLD THEME | by: ritualz999")
+print("⚜️ RITUAL HUB V3.1 LOADED | BLACK & GOLD THEME | by: ritualz999")
 print("📢 Discord: ritualz999 | Discord: rayo06996")
 print("🎯 Silent Aim with working FOV Circle")
 print("🟡 FOV Circle appears when Silent Aim AND Show FOV Circle are ON")
-print("👑 Click the crown to toggle the UI")
+print("👑 Crown button (pinky tip size) - click to toggle UI")
