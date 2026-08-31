@@ -1,4 +1,3 @@
-
 -- ============================================================
 -- RITUAL HUB VERSION 12.5 | KEYLESS ANNOUNCEMENT
 -- ============================================================
@@ -3237,7 +3236,6 @@ local CombatPage = createScrollingPage()
 local GlitchesPage = createScrollingPage()
 local CamLockPage = createScrollingPage()
 local SoruPage = createScrollingPage()
-local AppearancePage = createScrollingPage()
 local SongsPage = createScrollingPage()
 local BlacklistPage = createScrollingPage()
 local SacredVFXPage = createScrollingPage()
@@ -3295,8 +3293,8 @@ TRANSLATIONS = {
         ["Glitches"] = "Glitches",
         ["ESP"] = "ESP & Visuals",
         ["Soru"] = "Soru Engine",
-        ["Appearance"] = "Appearance",
-        ["VFX"] = "Sacred VFX",
+        ["Songs"] = "Songs & Music",
+        ["VFX"] = "Ritual VFX",
         ["Misc"] = "Misc",
 
         -- Cards
@@ -3327,7 +3325,7 @@ TRANSLATIONS = {
         ["Aura VFX"] = "Aura VFX",
         ["Fake Body"] = "Fake Body",
         ["Ambient Lights"] = "Ambient Lights",
-        ["Sacred VFX"] = "Sacred VFX",
+        ["Ritual VFX"] = "Ritual VFX",
         ["Performance"] = "Performance",
         ["Socials & Settings"] = "Socials & Settings",
         ["Language"] = "Language",
@@ -3400,7 +3398,7 @@ TRANSLATIONS = {
         ["Glitches"] = "Trucos",
         ["ESP"] = "ESP / Visuales",
         ["Soru"] = "Motor Soru",
-        ["Appearance"] = "Apariencia",
+        ["Songs"] = "Canciones y Música",
         ["VFX"] = "Efectos VFX",
         ["Misc"] = "Varios",
 
@@ -3432,7 +3430,7 @@ TRANSLATIONS = {
         ["Aura VFX"] = "Aura VFX",
         ["Fake Body"] = "Cuerpo Falso",
         ["Ambient Lights"] = "Luces Ambientes",
-        ["Sacred VFX"] = "Efectos Visuales Ritual",
+        ["Ritual VFX"] = "Efectos Visuales Ritual",
         ["Performance"] = "Rendimiento",
         ["Socials & Settings"] = "Social y Ajustes",
         ["Language"] = "Idioma",
@@ -3508,7 +3506,6 @@ local categories = {
     { key = "Glitches", page = GlitchesPage, y = 114 },
     { key = "ESP", page = CamLockPage, y = 144 },
     { key = "Soru", page = SoruPage, y = 174 },
-    { key = "Appearance", page = AppearancePage, y = 204 },
     { key = "Songs", page = SongsPage, y = 234 },
     { key = "VFX", page = SacredVFXPage, y = 264 },
     { key = "Misc", page = MiscPage, y = 294 },
@@ -3600,7 +3597,7 @@ for _, cat in ipairs(categories) do
         btn.TextColor3 = currentThemeColor -- GOLD
         StatsPage.Visible = false; CombatPage.Visible = false; GlitchesPage.Visible = false
         CamLockPage.Visible = false; SoruPage.Visible = false
-        AppearancePage.Visible = false; SongsPage.Visible = false; BlacklistPage.Visible = false
+        SongsPage.Visible = false; BlacklistPage.Visible = false
         SacredVFXPage.Visible = false; MiscPage.Visible = false
         cat.page.Visible = true
         if cat.key == "Soru" then
@@ -3674,12 +3671,12 @@ function addToggleElement(parent, labelText, defaultState, yPos, callback, confi
     local clickBtn = Instance.new("TextButton", frame)
     clickBtn.Size = UDim2.new(0, 36, 0, 16)
     clickBtn.Position = UDim2.new(1, -38, 0.5, -8)
-    clickBtn.BackgroundColor3 = defaultState and currentThemeColor or Color3.fromRGB(0, 0, 0) -- GOLD when on, black when off
-    clickBtn.BackgroundTransparency = defaultState and 0.2 or 0.5
+    clickBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- ALWAYS BLACK BACKGROUND
+    clickBtn.BackgroundTransparency = 0 -- FULLY OPAQUE BLACK
     clickBtn.Text = defaultState and "ON" or "OFF"
     clickBtn.Font = Enum.Font.GothamBold
     clickBtn.TextSize = 8.5
-    clickBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    clickBtn.TextColor3 = defaultState and Color3.fromRGB(255, 215, 0) or Color3.fromRGB(255, 255, 255) -- GOLD TEXT when ON, white when OFF
     clickBtn.TextStrokeTransparency = 0
     clickBtn.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     Instance.new("UICorner", clickBtn).CornerRadius = UDim.new(0, 6)
@@ -3691,15 +3688,15 @@ function addToggleElement(parent, labelText, defaultState, yPos, callback, confi
     local state = defaultState
     local function refresh()
         if state then
-            clickBtn.BackgroundColor3 = currentThemeColor
-            clickBtn.BackgroundTransparency = 0.2
+            clickBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- BLACK
+            clickBtn.BackgroundTransparency = 0 -- FULLY OPAQUE BLACK
             clickBtn.Text = "ON"
-            clickBtn.TextColor3 = Color3.fromRGB(0, 0, 0) -- BLACK TEXT ON GOLD
+            clickBtn.TextColor3 = Color3.fromRGB(255, 215, 0) -- GOLD TEXT
         else
-            clickBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-            clickBtn.BackgroundTransparency = 0.5
+            clickBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- BLACK
+            clickBtn.BackgroundTransparency = 0 -- FULLY OPAQUE BLACK
             clickBtn.Text = "OFF"
-            clickBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            clickBtn.TextColor3 = Color3.fromRGB(255, 255, 255) -- WHITE TEXT
         end
     end
 
@@ -3803,8 +3800,7 @@ function addStepper(parent, labelText, yPos, minVal, maxVal, step, getter, sette
     plus.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     Instance.new("UICorner", plus).CornerRadius = UDim.new(0, 4)
     local pStroke = Instance.new("UIStroke", plus)
-    pStroke.Color = currentThemeColor -- GOLD OUTLINE
-    pStroke.Thickness = 1.2
+    pStroke.Color = currentThemeColor -- GOLD OUTLINE    pStroke.Thickness = 1.2
     table.insert(themeStrokes, pStroke)
 
     minus.MouseButton1Click:Connect(function()
@@ -5057,7 +5053,7 @@ end)
 refreshPlayerListUI()
 
 -- ============================================================
--- NUEVAS PÁGINAS (APPEARANCE, BLACKLIST, MISC)
+-- NUEVAS PÁGINAS (BLACKLIST, MISC)
 -- ============================================================
 -- FPS/Ping Overlay
 local fpsOverlayGui = Instance.new("ScreenGui")
@@ -5100,172 +5096,6 @@ end)
 
 end
 
--- Appearance Page
-do
-local bgSelectorCard = createModuleCard("UI Background Selector", 65, AppearancePage)
-
-local bgOptions = {
-    { name = "Anime 1 (79345150236270)", id = "rbxassetid://79345150236270" },
-    { name = "Anime 2 (91081822837053)", id = "rbxassetid://91081822837053" },
-    { name = "Anime 3 (109470605984573)", id = "rbxassetid://109470605984573" },
-    { name = "Anime 4 (135204446064109)", id = "rbxassetid://135204446064109" },
-    { name = "Anime 5 (133381969265590)", id = "rbxassetid://133381969265590" },
-    { name = "Anime 6 (102851043691652)", id = "rbxassetid://102851043691652" },
-    { name = "Anime 7 (134915662604167)", id = "rbxassetid://134915662604167" },
-    { name = "Anime 8 (132404081379154)", id = "rbxassetid://132404081379154" },
-    { name = "None", id = "none" }
-}
-
-local currentBgIdx = 8
-
-local bgSelectorBtn = Instance.new("TextButton", bgSelectorCard)
-bgSelectorBtn.Size = UDim2.new(1, -16, 0, 26)
-bgSelectorBtn.Position = UDim2.new(0, 8, 0, 22)
-bgSelectorBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- BLACK
-bgSelectorBtn.BackgroundTransparency = 1
-bgSelectorBtn.Text = "📷 Wallpaper: " .. bgOptions[8].name
-bgSelectorBtn.Font = Enum.Font.GothamBold
-bgSelectorBtn.TextSize = 9
-bgSelectorBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-bgSelectorBtn.TextStrokeTransparency = 0
-bgSelectorBtn.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-Instance.new("UICorner", bgSelectorBtn).CornerRadius = UDim.new(0, 6)
-local bgBtnStroke = Instance.new("UIStroke", bgSelectorBtn)
-bgBtnStroke.Color = currentThemeColor -- GOLD OUTLINE
-bgBtnStroke.Thickness = 1
-table.insert(themeStrokes, bgBtnStroke)
-
-bgSelectorBtn.MouseButton1Click:Connect(function()
-    currentBgIdx = (currentBgIdx % #bgOptions) + 1
-    local selected = bgOptions[currentBgIdx]
-    bgSelectorBtn.Text = (currentLang == "ES" and "📷 Fondo: " or "📷 Wallpaper: ") .. selected.name
-    if selected.id == "none" then
-        bgImageFrame.Visible = false
-        toggleBG.Visible = false
-    else
-        bgImageFrame.Visible = true
-        bgImageFrame.Image = selected.id
-        toggleBG.Visible = true
-        toggleBG.Image = selected.id
-        pcall(function() game:GetService("ContentProvider"):PreloadAsync({bgImageFrame, toggleBG}) end)
-    end
-end)
-
-local fakeBodyCard = createModuleCard("Fake Body", 75, AppearancePage)
-addToggleElement(fakeBodyCard, "Fake Korblox", FakeKorbloxEnabled, 24, function(v)
-    FakeKorbloxEnabled = v
-    if v then applyFakeKorblox(player.Character) else removeFakeKorblox(player.Character) end
-end, "FakeKorblox")
-addToggleElement(fakeBodyCard, "Fake Headless", FakeHeadlessEnabled, 48, function(v)
-    FakeHeadlessEnabled = v
-    if v then applyFakeHeadless(player.Character) else removeFakeHeadless(player.Character) end
-end, "FakeHeadless")
-
-local auraCard = createModuleCard("Aura VFX", 150, AppearancePage)
-local auraSetters = {}
-local auraNames = {"Inferno", "Electric", "DarkSpirit", "Toxic", "Frost"}
-local auraIcons = {"🔥", "⚡", "💜", "💚", "❄️"}
-
-for i, auraName in ipairs(auraNames) do
-    local yPos = 24 + (i - 1) * 24
-    local setter, btn = addToggleElement(auraCard, auraIcons[i] .. " " .. auraName, false, yPos, function(v)
-        if v then
-            for j, otherName in ipairs(auraNames) do
-                if otherName ~= auraName and auraSetters[otherName] then
-                    auraSetters[otherName](false)
-                end
-            end
-            ApplyAura(auraName)
-        else
-            ClearAura()
-        end
-    end)
-    auraSetters[auraName] = setter
-end
-
--- UI Theme Colors Card (Solo GOLD, ya que es el único tema)
-local themeColorsCard = createModuleCard("UI Theme Colors", 50, AppearancePage)
-
-local themeBtn = Instance.new("TextButton", themeColorsCard)
-themeBtn.Size = UDim2.new(1, -16, 0, 26)
-themeBtn.Position = UDim2.new(0, 8, 0, 22)
-themeBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- BLACK
-themeBtn.BackgroundTransparency = 1
-themeBtn.Text = "GOLD (Default)"
-themeBtn.Font = Enum.Font.GothamBold
-themeBtn.TextSize = 9.5
-themeBtn.TextColor3 = Color3.fromRGB(255, 215, 0) -- GOLD
-themeBtn.TextStrokeTransparency = 0
-themeBtn.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-Instance.new("UICorner", themeBtn).CornerRadius = UDim.new(0, 5)
-local goldStroke = Instance.new("UIStroke", themeBtn)
-goldStroke.Color = Color3.fromRGB(255, 215, 0) -- GOLD OUTLINE
-goldStroke.Thickness = 1.2
-
-themeBtn.MouseButton1Click:Connect(function()
-    applyNewTheme("Gold") -- apply the gold theme again (no-op if already gold)
-end)
-
--- Ambient Lights Customizer (Luces Ambientes de Blox Fruits)
-local skyCard = createModuleCard("Ambient Lights / Luces Ambientes", 100, AppearancePage)
-
-function setBloxSkyColor(colorName, skyColor, outdoorColor)
-    pcall(function()
-        local lighting = game:GetService("Lighting")
-        local sky = lighting:FindFirstChildOfClass("Sky")
-        if not sky then
-            sky = Instance.new("Sky", lighting)
-        end
-
-        if colorName == "Reset" then
-            lighting.Ambient = Color3.fromRGB(120, 120, 120)
-            lighting.OutdoorAmbient = Color3.fromRGB(140, 140, 140)
-            lighting.ColorShift_Top = Color3.fromRGB(0, 0, 0)
-            return
-        end
-
-        lighting.Ambient = skyColor
-        lighting.OutdoorAmbient = outdoorColor or skyColor
-        lighting.ColorShift_Top = skyColor
-    end)
-end
-
-local skyBtnGrid = {
-    {name = "🌸 Pink", color = Color3.fromRGB(255, 105, 180)},
-    {name = "💜 Purple", color = Color3.fromRGB(150, 50, 250)},
-    {name = "🔴 Crimson", color = Color3.fromRGB(255, 40, 40)},
-    {name = "🌌 Blue", color = Color3.fromRGB(0, 120, 255)},
-    {name = "🌅 Gold", color = Color3.fromRGB(255, 215, 0)},
-    {name = "🔄 Reset", color = Color3.fromRGB(200, 200, 200)}
-}
-
-for idx, item in ipairs(skyBtnGrid) do
-    local sBtn = Instance.new("TextButton", skyCard)
-    sBtn.Size = UDim2.new(0.3, 0, 0, 22)
-    local row = math.floor((idx - 1) / 3)
-    local col = (idx - 1) % 3
-    sBtn.Position = UDim2.new(0.03 + (col * 0.32), 0, 0, 26 + (row * 28))
-    sBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- BLACK
-    sBtn.BackgroundTransparency = 1
-    sBtn.Text = item.name
-    sBtn.Font = Enum.Font.GothamBold
-    sBtn.TextSize = 8.5
-    sBtn.TextColor3 = item.color
-    sBtn.TextStrokeTransparency = 0
-    sBtn.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-    Instance.new("UICorner", sBtn).CornerRadius = UDim.new(0, 5)
-    local skyStroke = Instance.new("UIStroke", sBtn)
-    skyStroke.Color = item.color
-    skyStroke.Thickness = 1.2
-
-    sBtn.MouseButton1Click:Connect(function()
-        if item.name:find("Reset") then
-            setBloxSkyColor("Reset")
-        else
-            setBloxSkyColor(item.name, item.color, item.color)
-        end
-    end)
-end
 -- Songs Page
 do
 local songsNoticeCard = createModuleCard("Songs Notice", 50, SongsPage)
@@ -5435,9 +5265,9 @@ Players.PlayerAdded:Connect(refreshBlacklistUI)
 Players.PlayerRemoving:Connect(refreshBlacklistUI)
 end
 
--- Sacred VFX Page
+-- Ritual VFX Page
 do
-local vfxMainCard = createModuleCard("Sacred VFX", 110, SacredVFXPage)
+local vfxMainCard = createModuleCard("Ritual VFX", 110, SacredVFXPage)
 
 local vfxTitle = Instance.new("TextLabel", vfxMainCard)
 vfxTitle.Text = "✨ RITUAL VFX ✨"
