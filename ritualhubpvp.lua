@@ -1,5 +1,5 @@
 -- ============================================================
--- RITUAL HUB V1.0 | DELTA EXECUTOR | BLACK & GOLD THEME
+-- RITUAL HUB V2.0 | DELTA EXECUTOR | BLACK & GOLD THEME
 -- MADE BY: RITUALZ999
 -- ============================================================
 local Players = game:GetService("Players")
@@ -95,6 +95,13 @@ _G.G_AimbotFruit = false
 _G.G_AimbotSword = false
 _G.G_AimbotGun = false
 
+-- NEW Silent Aim Options
+_G.G_SilentAimHeadshot = false
+_G.G_SilentAimWallCheck = false
+_G.G_SilentAimPrediction = false
+_G.G_SilentAimSmoothness = 0.3
+_G.G_SilentAimLockOn = false
+
 -- Granular Exclusions
 _G.G_Ex_Fruit_M1 = false; _G.G_Ex_Fruit_Z = false; _G.G_Ex_Fruit_X = false; _G.G_Ex_Fruit_C = false; _G.G_Ex_Fruit_V = false; _G.G_Ex_Fruit_F = false
 _G.G_Ex_Melee_M1 = false; _G.G_Ex_Melee_Z = false; _G.G_Ex_Melee_X = false; _G.G_Ex_Melee_C = false; _G.G_Ex_Melee_V = false; _G.G_Ex_Melee_F = false
@@ -154,6 +161,77 @@ pcall(function()
 end)
 
 -- ============================================================
+-- CROWN TOGGLE BUTTON (Pinky Tip Size - Draggable & Clickable)
+-- ============================================================
+local crownToggleGui = Instance.new("ScreenGui")
+crownToggleGui.Name = "RitualCrownToggle"
+crownToggleGui.ResetOnSpawn = false
+crownToggleGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+crownToggleGui.Parent = playerGui
+
+local crownButton = Instance.new("TextButton")
+crownButton.Size = UDim2.new(0, 28, 0, 28) -- Pinky tip size
+crownButton.Position = UDim2.new(0.01, 0, 0.5, -14)
+crownButton.BackgroundColor3 = BLACK
+crownButton.BackgroundTransparency = 0.15
+crownButton.Text = "👑"
+crownButton.Font = Enum.Font.GothamBold
+crownButton.TextSize = 16
+crownButton.TextColor3 = GOLD
+crownButton.Active = true
+crownButton.Draggable = true
+crownButton.Visible = true
+crownButton.ZIndex = 1000
+crownButton.Parent = crownToggleGui
+
+Instance.new("UICorner", crownButton).CornerRadius = UDim.new(1, 0)
+local crownStroke = Instance.new("UIStroke", crownButton)
+crownStroke.Color = GOLD
+crownStroke.Thickness = 2
+crownStroke.Transparency = 0
+
+-- Glow effect on crown
+local glow = Instance.new("ImageLabel", crownButton)
+glow.Size = UDim2.new(1.5, 0, 1.5, 0)
+glow.Position = UDim2.new(-0.25, 0, -0.25, 0)
+glow.BackgroundTransparency = 1
+glow.Image = "rbxassetid://5553946801"
+glow.ImageTransparency = 0.7
+glow.ZIndex = 0
+
+-- Pulse animation
+task.spawn(function()
+    while crownButton and crownButton.Parent do
+        for i = 1, 2 do
+            pcall(function()
+                TweenService:Create(crownButton, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+                    BackgroundTransparency = 0.05
+                }):Play()
+            end)
+            task.wait(0.8)
+            pcall(function()
+                TweenService:Create(crownButton, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+                    BackgroundTransparency = 0.25
+                }):Play()
+            end)
+            task.wait(0.8)
+        end
+    end
+end)
+
+local mainFrame = nil
+local screenGui = nil
+
+crownButton.MouseButton1Click:Connect(function()
+    if mainFrame then
+        mainFrame.Visible = not mainFrame.Visible
+        if mainFrame.Visible then
+            crownButton.Visible = false
+        end
+    end
+end)
+
+-- ============================================================
 -- PERSISTENCIA TOTAL DE CONFIGURACIÓN
 -- ============================================================
 UI_Toggle_Refreshes = {}
@@ -199,6 +277,11 @@ function SaveConfig()
         ShowLine = _G.G_SilentAimShowLine,
         FOVRadius = _G.G_SilentAimFOV,
         AimbotMaxDist = maxRange,
+        SilentAimHeadshot = _G.G_SilentAimHeadshot,
+        SilentAimWallCheck = _G.G_SilentAimWallCheck,
+        SilentAimPrediction = _G.G_SilentAimPrediction,
+        SilentAimSmoothness = _G.G_SilentAimSmoothness,
+        SilentAimLockOn = _G.G_SilentAimLockOn,
         AimlockPlayers = AimlockPlayerEnabled,
         AimlockNPCs = AimlockNpcEnabled,
         PlayerWidgetActive = PlayerWidgetActive,
@@ -286,6 +369,13 @@ function LoadConfig()
                 if FOVCircle then FOVCircle.Radius = conf.FOVRadius end
             end
             if conf.AimbotMaxDist ~= nil then maxRange = conf.AimbotMaxDist end
+            
+            -- New Silent Aim settings
+            if conf.SilentAimHeadshot ~= nil then _G.G_SilentAimHeadshot = conf.SilentAimHeadshot end
+            if conf.SilentAimWallCheck ~= nil then _G.G_SilentAimWallCheck = conf.SilentAimWallCheck end
+            if conf.SilentAimPrediction ~= nil then _G.G_SilentAimPrediction = conf.SilentAimPrediction end
+            if conf.SilentAimSmoothness ~= nil then _G.G_SilentAimSmoothness = conf.SilentAimSmoothness end
+            if conf.SilentAimLockOn ~= nil then _G.G_SilentAimLockOn = conf.SilentAimLockOn end
 
             if conf.SanguineManual ~= nil then SanguineManualEnabled = conf.SanguineManual end
             if conf.SanguineManualWidgetVisible ~= nil then SanguineManualWidgetVisible = conf.SanguineManualWidgetVisible end
@@ -351,8 +441,6 @@ end)
 -- ============================================================
 -- DRAGON GUN M1 FAST ATTACK (REMOVED - No Aimbot)
 -- ============================================================
--- Dragon Gun M1 functionality has been removed as requested
-
 function UpdateDragonButton()
     -- Removed
 end
@@ -1853,12 +1941,13 @@ function performExtendedSoru(targetPos)
 end
 
 -- ============================================================
--- SILENT AIM WITH FOV CIRCLE (SKILLS LOCK ON TO TARGETS IN FOV)
+-- SILENT AIM WITH FOV CIRCLE & ADVANCED OPTIONS
 -- ============================================================
 local oldIndex = nil
 local oldNamecall = nil
 
 local currentSilentAimTarget = nil
+local currentSilentAimPosition = nil
 
 function IsSilentAimAlly(p)
     local main = player:FindFirstChild("PlayerGui") and player.PlayerGui:FindFirstChild("Main")
@@ -1951,6 +2040,29 @@ end
 _G.G_AimbotSafeZoneCheck = true
 _G.G_AimbotPvPCheck = true
 
+-- Wall check function
+function IsTargetVisible(targetPart)
+    if not _G.G_SilentAimWallCheck then return true end
+    local myChar = player.Character
+    if not myChar then return true end
+    local root = myChar:FindFirstChild("HumanoidRootPart")
+    if not root then return true end
+    
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+    raycastParams.FilterDescendantsInstances = {myChar}
+    
+    local direction = (targetPart.Position - root.Position).Unit
+    local ray = workspace:Raycast(root.Position, direction * 500, raycastParams)
+    if ray then
+        local hit = ray.Instance
+        if hit and hit:IsA("BasePart") and hit.Parent ~= targetPart.Parent then
+            return false
+        end
+    end
+    return true
+end
+
 function GetClosestTargetInFOV()
     local myChar = player.Character
     local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
@@ -1972,7 +2084,10 @@ function GetClosestTargetInFOV()
                 local hum = targetP.Character:FindFirstChildOfClass("Humanoid")
                 local hrp = targetP.Character:FindFirstChild("HumanoidRootPart")
                 if hum and hum.Health > 0 and hrp then
-                    return targetP.Character:FindFirstChild(_G.G_SilentAimPart) or hrp
+                    local targetPart = targetP.Character:FindFirstChild(_G.G_SilentAimPart) or hrp
+                    if IsTargetVisible(targetPart) then
+                        return targetPart
+                    end
                 end
             end
         end
@@ -1996,24 +2111,55 @@ function GetClosestTargetInFOV()
 
         local hum = character:FindFirstChildOfClass("Humanoid")
         if not hum or hum.Health <= 0 then return end
-        local part = character:FindFirstChild(_G.G_SilentAimPart) or character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("Head")
-        if not part then return end
+        
+        -- Target part selection - Headshot option
+        local targetPart = nil
+        if _G.G_SilentAimHeadshot then
+            targetPart = character:FindFirstChild("Head")
+        end
+        if not targetPart then
+            targetPart = character:FindFirstChild(_G.G_SilentAimPart) or character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("Head")
+        end
+        if not targetPart then return end
 
-        local worldDist = (part.Position - myHRP.Position).Magnitude
+        -- Wall check
+        if not IsTargetVisible(targetPart) then return end
+
+        local worldDist = (targetPart.Position - myHRP.Position).Magnitude
         if worldDist > shortestDist then return end
 
         -- Check if target is within FOV
-        local screenPos, onScreen = cam:WorldToViewportPoint(part.Position)
+        local screenPos, onScreen = cam:WorldToViewportPoint(targetPart.Position)
         if not onScreen then return end
         
         local screenCenter = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
         local screenDist = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
         
         if screenDist <= fovRadius then
+            -- Prediction
+            if _G.G_SilentAimPrediction then
+                local velocity = hum:GetVelocity()
+                if velocity and velocity.Magnitude > 5 then
+                    local predictedPos = targetPart.Position + (velocity * 0.15)
+                    local predScreenPos, predOnScreen = cam:WorldToViewportPoint(predictedPos)
+                    if predOnScreen then
+                        local predScreenDist = (Vector2.new(predScreenPos.X, predScreenPos.Y) - screenCenter).Magnitude
+                        if predScreenDist <= fovRadius and predScreenDist < shortestScreenDist then
+                            shortestScreenDist = predScreenDist
+                            shortestDist = worldDist
+                            closestPart = targetPart
+                            currentSilentAimPosition = predictedPos
+                            return
+                        end
+                    end
+                end
+            end
+            
             if screenDist < shortestScreenDist then
                 shortestScreenDist = screenDist
                 shortestDist = worldDist
-                closestPart = part
+                closestPart = targetPart
+                currentSilentAimPosition = targetPart.Position
             end
         end
     end
@@ -2061,7 +2207,13 @@ RunService.RenderStepped:Connect(function()
         
         -- Update target
         if _G.G_SilentAimSkill then
-            currentSilentAimTarget = GetClosestTargetInFOV()
+            local target = GetClosestTargetInFOV()
+            if target then
+                currentSilentAimTarget = target
+            elseif not _G.G_SilentAimLockOn then
+                currentSilentAimTarget = nil
+            end
+            -- If lock-on is enabled, keep the last target
         else
             currentSilentAimTarget = nil
         end
@@ -2075,7 +2227,10 @@ if hookmetamethod then
             if not checkcaller() then
                 if self == mouse and (key == "Hit" or key == "Target") then
                     if _G.G_SilentAimSkill and currentSilentAimTarget then
-                        if key == "Hit" then return CFrame.new(currentSilentAimTarget.Position) end
+                        if key == "Hit" then 
+                            local pos = currentSilentAimPosition or currentSilentAimTarget.Position
+                            return CFrame.new(pos) 
+                        end
                         if key == "Target" then return currentSilentAimTarget end
                     end
                 end
@@ -2093,7 +2248,7 @@ if hookmetamethod then
             if not checkcaller() then
                 if (method == "fireserver" or method == "invokeserver") then
                     if _G.G_SilentAimSkill and currentSilentAimTarget then
-                        local activePos = currentSilentAimTarget.Position
+                        local activePos = currentSilentAimPosition or currentSilentAimTarget.Position
 
                         if self.Name == "RE/RegisterHit" or self.Name == "RegisterHit" or self.Name:find("RegisterHit") then
                             local targetChar = currentSilentAimTarget.Parent
@@ -2153,7 +2308,10 @@ else
             mt.__index = newcclosure(function(self, key)
                 if not checkcaller() and self == mouse and (key == "Hit" or key == "Target") then
                     if _G.G_SilentAimSkill and currentSilentAimTarget then
-                        if key == "Hit" then return CFrame.new(currentSilentAimTarget.Position) end
+                        if key == "Hit" then 
+                            local pos = currentSilentAimPosition or currentSilentAimTarget.Position
+                            return CFrame.new(pos) 
+                        end
                         if key == "Target" then return currentSilentAimTarget end
                     end
                 end
@@ -2167,7 +2325,7 @@ else
 
                 if not checkcaller() and (method == "fireserver" or method == "invokeserver") then
                     if _G.G_SilentAimSkill and currentSilentAimTarget then
-                        local activePos = currentSilentAimTarget.Position
+                        local activePos = currentSilentAimPosition or currentSilentAimTarget.Position
 
                         if self.Name == "RE/RegisterHit" or self.Name == "RegisterHit" or self.Name:find("RegisterHit") then
                             local targetChar = currentSilentAimTarget.Parent
@@ -2238,365 +2396,6 @@ local function safeParent(gui)
         pcall(function() gui.Parent = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui", 3) end)
     end
 end
-
-GuiStore = {
-    screenGui = Instance.new("ScreenGui"),
-    toggleIconGui = Instance.new("ScreenGui"),
-    playerWidgetGui = Instance.new("ScreenGui"),
-    npcWidgetGui = Instance.new("ScreenGui"),
-    superJumpWidgetGui = Instance.new("ScreenGui"),
-    sanguineManualWidgetGui = Instance.new("ScreenGui"),
-    sanguineAutoWidgetGui = Instance.new("ScreenGui"),
-    soulGuitarWidgetGui = Instance.new("ScreenGui"),
-    portalSoruWidgetGui = Instance.new("ScreenGui"),
-    grokAIWidgetGui = Instance.new("ScreenGui")
-}
-
-GuiStore.screenGui.Name = "RitualUI_UltimateUI"
-GuiStore.screenGui.ResetOnSpawn = false
-safeParent(GuiStore.screenGui)
-
-GuiStore.toggleIconGui.Name = "RitualUI_ToggleIcon"
-GuiStore.toggleIconGui.ResetOnSpawn = false
-safeParent(GuiStore.toggleIconGui)
-
-GuiStore.playerWidgetGui.Name = "RitualUI_PlayerWidget"
-GuiStore.playerWidgetGui.ResetOnSpawn = false
-GuiStore.playerWidgetGui.DisplayOrder = 99999
-GuiStore.playerWidgetGui.IgnoreGuiInset = true
-safeParent(GuiStore.playerWidgetGui)
-
-GuiStore.npcWidgetGui.Name = "RitualUI_NpcWidget"
-GuiStore.npcWidgetGui.ResetOnSpawn = false
-GuiStore.npcWidgetGui.DisplayOrder = 99999
-GuiStore.npcWidgetGui.IgnoreGuiInset = true
-safeParent(GuiStore.npcWidgetGui)
-
-GuiStore.superJumpWidgetGui.Name = "RitualUI_SuperJumpWidget"
-GuiStore.superJumpWidgetGui.ResetOnSpawn = false
-GuiStore.superJumpWidgetGui.DisplayOrder = 99999
-GuiStore.superJumpWidgetGui.IgnoreGuiInset = true
-safeParent(GuiStore.superJumpWidgetGui)
-
-GuiStore.sanguineManualWidgetGui.Name = "RitualUI_SanguineManualWidget"
-GuiStore.sanguineManualWidgetGui.ResetOnSpawn = false
-GuiStore.sanguineManualWidgetGui.DisplayOrder = 99999
-GuiStore.sanguineManualWidgetGui.IgnoreGuiInset = true
-safeParent(GuiStore.sanguineManualWidgetGui)
-
-GuiStore.sanguineAutoWidgetGui.Name = "RitualUI_SanguineAutoWidget"
-GuiStore.sanguineAutoWidgetGui.ResetOnSpawn = false
-GuiStore.sanguineAutoWidgetGui.DisplayOrder = 99999
-GuiStore.sanguineAutoWidgetGui.IgnoreGuiInset = true
-safeParent(GuiStore.sanguineAutoWidgetGui)
-
-GuiStore.soulGuitarWidgetGui.Name = "RitualUI_SoulGuitarWidget"
-GuiStore.soulGuitarWidgetGui.ResetOnSpawn = false
-GuiStore.soulGuitarWidgetGui.DisplayOrder = 99999
-GuiStore.soulGuitarWidgetGui.IgnoreGuiInset = true
-safeParent(GuiStore.soulGuitarWidgetGui)
-
-GuiStore.portalSoruWidgetGui.Name = "RitualUI_PortalSoruWidget"
-GuiStore.portalSoruWidgetGui.ResetOnSpawn = false
-GuiStore.portalSoruWidgetGui.DisplayOrder = 99999
-GuiStore.portalSoruWidgetGui.IgnoreGuiInset = true
-safeParent(GuiStore.portalSoruWidgetGui)
-
-GuiStore.grokAIWidgetGui.Name = "RitualUI_GrokAIWidget"
-GuiStore.grokAIWidgetGui.ResetOnSpawn = false
-GuiStore.grokAIWidgetGui.DisplayOrder = 99999
-GuiStore.grokAIWidgetGui.IgnoreGuiInset = true
-safeParent(GuiStore.grokAIWidgetGui)
-
-local screenGui = GuiStore.screenGui
-local toggleIconGui = GuiStore.toggleIconGui
-local playerWidgetGui = GuiStore.playerWidgetGui
-local npcWidgetGui = GuiStore.npcWidgetGui
-local superJumpWidgetGui = GuiStore.superJumpWidgetGui
-local sanguineManualWidgetGui = GuiStore.sanguineManualWidgetGui
-local sanguineAutoWidgetGui = GuiStore.sanguineAutoWidgetGui
-local soulGuitarWidgetGui = GuiStore.soulGuitarWidgetGui
-local portalSoruWidgetGui = GuiStore.portalSoruWidgetGui
-local grokAIWidgetGui = GuiStore.grokAIWidgetGui
-
--- ============================================================
--- CREAR WIDGETS FLOTANTES
--- ============================================================
-function updateWidgetsVisuals()
-    local isLight = isColorLight(currentThemeColor)
-    local darkTxt = Color3.fromRGB(15, 10, 20)
-    local lightTxt = Color3.fromRGB(255, 255, 255)
-
-    if PlayerWidgetBtn then
-        PlayerWidgetBtn.Visible = PlayerWidgetActive
-        PlayerWidgetBtn.BackgroundColor3 = AimlockPlayerEnabled and currentThemeColor or BLACK
-        PlayerWidgetBtn.BackgroundTransparency = AimlockPlayerEnabled and 0 or 1
-        PlayerWidgetBtn.TextColor3 = AimlockPlayerEnabled and (isLight and darkTxt or lightTxt) or lightTxt
-        PlayerWidgetBtn.Text = AimlockPlayerEnabled and "🔒 PLAYER: ON" or "🔓 PLAYER: OFF"
-    end
-    if NpcWidgetBtn then
-        NpcWidgetBtn.Visible = NpcWidgetActive
-        NpcWidgetBtn.BackgroundColor3 = AimlockNpcEnabled and currentThemeColor or BLACK
-        NpcWidgetBtn.BackgroundTransparency = AimlockNpcEnabled and 0 or 1
-        NpcWidgetBtn.TextColor3 = AimlockNpcEnabled and (isLight and darkTxt or lightTxt) or lightTxt
-        NpcWidgetBtn.Text = AimlockNpcEnabled and "🔒 NPC: ON" or "🔓 NPC: OFF"
-    end
-    if SuperJumpWidget then
-        SuperJumpWidget.Visible = SuperJumpWidgetVisible
-        SuperJumpWidget.BackgroundColor3 = currentThemeColor
-        SuperJumpWidget.BackgroundTransparency = 0
-        SuperJumpWidget.TextColor3 = isLight and darkTxt or lightTxt
-        SuperJumpWidget.Text = "⬆ JUMP"
-    end
-    if SanguineManualWidget then
-        SanguineManualWidget.Visible = SanguineManualWidgetVisible
-        SanguineManualWidget.BackgroundColor3 = currentThemeColor
-        SanguineManualWidget.BackgroundTransparency = 0
-        SanguineManualWidget.TextColor3 = isLight and darkTxt or lightTxt
-        SanguineManualWidget.Text = "🩸 SANGUINE Z"
-    end
-    if SanguineAutoWidget then
-        SanguineAutoWidget.Visible = SanguineWidgetVisible
-        SanguineAutoWidget.BackgroundColor3 = SanguineAutoEnabled and currentThemeColor or BLACK
-        SanguineAutoWidget.BackgroundTransparency = SanguineAutoEnabled and 0 or 1
-        SanguineAutoWidget.TextColor3 = SanguineAutoEnabled and (isLight and darkTxt or lightTxt) or lightTxt
-        SanguineAutoWidget.Text = SanguineAutoEnabled and "🔴 Auto: ON" or "⚫ Auto: OFF"
-    end
-end
-
-function makeFloatingWidget(parent, pos, title)
-    pcall(function()
-        parent.DisplayOrder = 99999
-        parent.IgnoreGuiInset = true
-        parent.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    end)
-
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 130, 0, 36)
-    btn.Position = pos
-    btn.BackgroundColor3 = BLACK
-    btn.BackgroundTransparency = 0.15
-    btn.Font = Enum.Font.GothamBold
-    btn.TextColor3 = TEXT_WHITE
-    btn.TextSize = 11.5
-    btn.Visible = false
-    btn.Active = true
-    btn.Draggable = true
-    btn.ZIndex = 1000
-    btn.Parent = parent
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
-    local sk = Instance.new("UIStroke", btn)
-    sk.Color = GOLD
-    sk.Thickness = 1.5
-    table.insert(themeStrokes, sk)
-    return btn
-end
-
-SuperJumpWidget = makeFloatingWidget(superJumpWidgetGui, UDim2.new(0.68, 0, 0.25, 0), "SJUMP")
-SuperJumpWidget.Text = "⬆ JUMP"
-SuperJumpWidget.MouseButton1Click:Connect(function()
-    if doSuperJump then doSuperJump() end
-end)
-
-SanguineManualWidget = makeFloatingWidget(sanguineManualWidgetGui, UDim2.new(0.68, 0, 0.33, 0), "SANGUINE MANUAL")
-SanguineManualWidget.Text = "🩸 SANGUINE Z"
-SanguineManualWidget.MouseButton1Click:Connect(function()
-    dropFPSManual()
-end)
-
-SanguineAutoWidget = makeFloatingWidget(sanguineAutoWidgetGui, UDim2.new(0.68, 0, 0.41, 0), "SANGUINE AUTO")
-SanguineAutoWidget.Text = "🔴 Auto: ON"
-SanguineAutoWidget.MouseButton1Click:Connect(function()
-    SanguineAutoEnabled = not SanguineAutoEnabled
-    updateWidgetsVisuals()
-end)
-
-function makeWidget(parent, pos)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 115, 0, 36)
-    btn.Position = pos
-    btn.BackgroundColor3 = BLACK
-    btn.Font = Enum.Font.GothamBold
-    btn.TextColor3 = TEXT_WHITE
-    btn.TextSize = 10
-    btn.Visible = false
-    btn.Active = true
-    btn.Draggable = true
-    btn.Parent = parent
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
-    local sk = Instance.new("UIStroke", btn)
-    sk.Color = GOLD
-    sk.Thickness = 1.5
-    table.insert(themeStrokes, sk)
-    return btn
-end
-
-PlayerWidgetBtn = makeWidget(playerWidgetGui, UDim2.new(0.82, 0, 0.20, 0))
-PlayerWidgetBtn.Text = "🔓 PLAYER: OFF"
-PlayerWidgetBtn.MouseButton1Click:Connect(function()
-    if setPlayerLockState then setPlayerLockState(not AimlockPlayerEnabled) else AimlockPlayerEnabled = not AimlockPlayerEnabled; updateWidgetsVisuals() end
-end)
-
-NpcWidgetBtn = makeWidget(npcWidgetGui, UDim2.new(0.82, 0, 0.27, 0))
-NpcWidgetBtn.Text = "🔓 NPC: OFF"
-NpcWidgetBtn.MouseButton1Click:Connect(function()
-    if setNpcLockState then setNpcLockState(not AimlockNpcEnabled) else AimlockNpcEnabled = not AimlockNpcEnabled; updateWidgetsVisuals() end
-end)
-
--- ============================================================
--- INTERFAZ PRINCIPAL RITUAL HUB
--- ============================================================
-local mainFrame = Instance.new("Frame")
-mainFrame.Name = "RitualMainFrame"
-mainFrame.Size = UDim2.new(0, 480, 0, 315)
-mainFrame.Position = UDim2.new(0.5, -240, 0.5, -157)
-mainFrame.BackgroundColor3 = BLACK
-mainFrame.BackgroundTransparency = 0
-mainFrame.Visible = true
-mainFrame.Active = true
-mainFrame.Draggable = true
-mainFrame.Parent = screenGui
-Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 24)
-
-local mainFrameStroke = Instance.new("UIStroke", mainFrame)
-mainFrameStroke.Color = GOLD
-mainFrameStroke.Thickness = 2
-table.insert(themeStrokes, mainFrameStroke)
-
--- RITUAL HUB HEADER
-local headerFrame = Instance.new("Frame", mainFrame)
-headerFrame.Size = UDim2.new(1, 0, 0, 45)
-headerFrame.Position = UDim2.new(0, 0, 0, 0)
-headerFrame.BackgroundColor3 = BLACK
-headerFrame.BackgroundTransparency = 0
-Instance.new("UICorner", headerFrame).CornerRadius = UDim.new(0, 24)
-
-local headerStroke = Instance.new("UIStroke", headerFrame)
-headerStroke.Color = GOLD
-headerStroke.Thickness = 1.5
-
-local ritualTitle = Instance.new("TextLabel", headerFrame)
-ritualTitle.Size = UDim2.new(0.7, 0, 1, 0)
-ritualTitle.Position = UDim2.new(0, 15, 0, 0)
-ritualTitle.BackgroundTransparency = 1
-ritualTitle.Text = "⚜️ RITUAL HUB"
-ritualTitle.Font = Enum.Font.GothamBlack
-ritualTitle.TextSize = 18
-ritualTitle.TextColor3 = GOLD
-ritualTitle.TextXAlignment = Enum.TextXAlignment.Left
-table.insert(themeTexts, ritualTitle)
-
-local ritualSubtitle = Instance.new("TextLabel", headerFrame)
-ritualSubtitle.Size = UDim2.new(0.3, 0, 1, 0)
-ritualSubtitle.Position = UDim2.new(0.7, 0, 0, 0)
-ritualSubtitle.BackgroundTransparency = 1
-ritualSubtitle.Text = "by: ritualz999"
-ritualSubtitle.Font = Enum.Font.GothamBold
-ritualSubtitle.TextSize = 10
-ritualSubtitle.TextColor3 = DARK_GOLD
-ritualSubtitle.TextXAlignment = Enum.TextXAlignment.Right
-ritualSubtitle.TextYAlignment = Enum.TextYAlignment.Center
-table.insert(themeTexts, ritualSubtitle)
-
--- Background decoration
-local bgDecor = Instance.new("ImageLabel", mainFrame)
-bgDecor.Name = "RitualBackground"
-bgDecor.Size = UDim2.new(1, 0, 1, 0)
-bgDecor.Position = UDim2.new(0, 0, 0, 0)
-bgDecor.BackgroundTransparency = 1
-bgDecor.ImageTransparency = 0.85
-bgDecor.ScaleType = Enum.ScaleType.Crop
-bgDecor.ZIndex = 0
-bgDecor.Image = "rbxassetid://132404081379154"
-Instance.new("UICorner", bgDecor).CornerRadius = UDim.new(0, 24)
-
-local topLabel = Instance.new("TextLabel", mainFrame)
-topLabel.Size = UDim2.new(0, 200, 0, 22)
-topLabel.Position = UDim2.new(0.5, -100, 0, 52)
-topLabel.BackgroundTransparency = 1
-topLabel.Text = "🎵 Discord: ritualz999"
-topLabel.Font = Enum.Font.GothamBold
-topLabel.TextSize = 10
-topLabel.TextColor3 = DARK_GOLD
-topLabel.TextStrokeTransparency = 0
-topLabel.TextStrokeColor3 = BLACK
-
-local controlsContainer = Instance.new("Frame", mainFrame)
-controlsContainer.Size = UDim2.new(0, 50, 0, 25)
-controlsContainer.Position = UDim2.new(1, -60, 0, 52)
-controlsContainer.BackgroundTransparency = 1
-
-function createTopControl(text, xOff, color, cb)
-    local btn = Instance.new("TextButton", controlsContainer)
-    btn.Size = UDim2.new(0, 22, 0, 22)
-    btn.Position = UDim2.new(0, xOff, 0, 0)
-    btn.BackgroundColor3 = BLACK
-    btn.BackgroundTransparency = 0
-    btn.Text = text
-    btn.Font = Enum.Font.GothamBlack
-    btn.TextSize = 14
-    btn.TextColor3 = color
-    btn.TextStrokeTransparency = 0
-    btn.TextStrokeColor3 = BLACK
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-    local tcStroke = Instance.new("UIStroke", btn)
-    tcStroke.Color = color
-    tcStroke.Thickness = 1
-    btn.MouseButton1Click:Connect(cb)
-end
-
-createTopControl("-", 0, GOLD, function()
-    mainFrame.Visible = false
-    openButton.Visible = true
-end)
-createTopControl("X", 26, RITUAL_RED, function()
-    screenGui:Destroy(); toggleIconGui:Destroy()
-    playerWidgetGui:Destroy(); npcWidgetGui:Destroy()
-    superJumpWidgetGui:Destroy(); sanguineAutoWidgetGui:Destroy()
-    soulGuitarWidgetGui:Destroy()
-    portalSoruWidgetGui:Destroy()
-    if fpsOverlayGui then fpsOverlayGui:Destroy() end
-    ClearESP()
-end)
-
-local openButton = Instance.new("TextButton")
-openButton.Size = UDim2.new(0, 42, 0, 42)
-openButton.Position = UDim2.new(0, 15, 0, 15)
-openButton.BackgroundColor3 = BLACK
-openButton.BackgroundTransparency = 0
-openButton.Text = ""
-openButton.Visible = false
-openButton.Active = true
-openButton.Draggable = true
-openButton.Parent = toggleIconGui
-
-local toggleBG = Instance.new("ImageLabel")
-toggleBG.Name = "ToggleBackground"
-toggleBG.Image = "rbxassetid://132404081379154"
-toggleBG.Size = UDim2.new(1, 0, 1, 0)
-toggleBG.Position = UDim2.new(0, 0, 0, 0)
-toggleBG.BackgroundTransparency = 1
-toggleBG.ScaleType = Enum.ScaleType.Crop
-toggleBG.ZIndex = 1 
-toggleBG.Parent = openButton
-
-Instance.new("UICorner", toggleBG).CornerRadius = UDim.new(0, 8)
-Instance.new("UICorner", openButton).CornerRadius = UDim.new(0, 8)
-local openStroke = Instance.new("UIStroke", openButton)
-openStroke.Thickness = 2
-openStroke.Transparency = 0
-openStroke.Color = GOLD
-table.insert(themeStrokes, openStroke)
-
-openButton.MouseButton1Click:Connect(function()
-    openButton.Visible = false
-    centerAndMaximizeUI()
-end)
-
-local sidebar = Instance.new("Frame", mainFrame)
-sidebar.Size = UDim2.new(0, 115, 1, 0)
-sidebar.Position = UDim2.new(0, 10, 0, 0)
-sidebar.BackgroundTransparency = 1
 
 -- ============================================================
 -- UI HELPERS
@@ -2673,7 +2472,7 @@ function addToggleElement(parent, labelText, defaultState, yPos, callback, confi
     clickBtn.Text = defaultState and "ON" or "OFF"
     clickBtn.Font = Enum.Font.GothamBold
     clickBtn.TextSize = 8.5
-    clickBtn.TextColor3 = TEXT_WHITE
+    clickBtn.TextColor3 = defaultState and BLACK or TEXT_WHITE
     clickBtn.TextStrokeTransparency = 0
     clickBtn.TextStrokeColor3 = BLACK
     Instance.new("UICorner", clickBtn).CornerRadius = UDim.new(0, 6)
@@ -2698,8 +2497,7 @@ function addToggleElement(parent, labelText, defaultState, yPos, callback, confi
             clickBtn.TextColor3 = TEXT_WHITE
             clickBtn.TextStrokeTransparency = 0
             clickBtn.TextStrokeColor3 = BLACK
-        end
-    end
+        end    end
 
     local function setExternalState(newState)
         state = newState
@@ -2824,19 +2622,136 @@ function addStepper(parent, labelText, yPos, minVal, maxVal, step, getter, sette
 end
 
 -- ============================================================
--- SIDEBAR & PAGES
+-- CREATE MAIN UI
 -- ============================================================
-local categories = {
-    { key = "Stats", page = StatsPage, y = 54 },
-    { key = "Combat", page = CombatPage, y = 84 },
-    { key = "Glitches", page = GlitchesPage, y = 114 },
-    { key = "ESP", page = CamLockPage, y = 144 },
-    { key = "Soru", page = SoruPage, y = 174 },
-    { key = "Appearance", page = AppearancePage, y = 204 },
-    { key = "Songs", page = SongsPage, y = 234 },
-    { key = "VFX", page = SacredVFXPage, y = 264 },
-    { key = "Misc", page = MiscPage, y = 294 },
-}
+screenGui = Instance.new("ScreenGui")
+screenGui.Name = "RitualUI_UltimateUI"
+screenGui.ResetOnSpawn = false
+safeParent(screenGui)
+
+mainFrame = Instance.new("Frame")
+mainFrame.Name = "RitualMainFrame"
+mainFrame.Size = UDim2.new(0, 480, 0, 315)
+mainFrame.Position = UDim2.new(0.5, -240, 0.5, -157)
+mainFrame.BackgroundColor3 = BLACK
+mainFrame.BackgroundTransparency = 0
+mainFrame.Visible = true
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 24)
+
+local mainFrameStroke = Instance.new("UIStroke", mainFrame)
+mainFrameStroke.Color = GOLD
+mainFrameStroke.Thickness = 2
+table.insert(themeStrokes, mainFrameStroke)
+
+-- HEADER
+local headerFrame = Instance.new("Frame", mainFrame)
+headerFrame.Size = UDim2.new(1, 0, 0, 45)
+headerFrame.Position = UDim2.new(0, 0, 0, 0)
+headerFrame.BackgroundColor3 = BLACK
+headerFrame.BackgroundTransparency = 0
+Instance.new("UICorner", headerFrame).CornerRadius = UDim.new(0, 24)
+
+local headerStroke = Instance.new("UIStroke", headerFrame)
+headerStroke.Color = GOLD
+headerStroke.Thickness = 1.5
+
+local ritualTitle = Instance.new("TextLabel", headerFrame)
+ritualTitle.Size = UDim2.new(0.7, 0, 1, 0)
+ritualTitle.Position = UDim2.new(0, 15, 0, 0)
+ritualTitle.BackgroundTransparency = 1
+ritualTitle.Text = "⚜️ RITUAL HUB"
+ritualTitle.Font = Enum.Font.GothamBlack
+ritualTitle.TextSize = 18
+ritualTitle.TextColor3 = GOLD
+ritualTitle.TextXAlignment = Enum.TextXAlignment.Left
+table.insert(themeTexts, ritualTitle)
+
+local ritualSubtitle = Instance.new("TextLabel", headerFrame)
+ritualSubtitle.Size = UDim2.new(0.3, 0, 1, 0)
+ritualSubtitle.Position = UDim2.new(0.7, 0, 0, 0)
+ritualSubtitle.BackgroundTransparency = 1
+ritualSubtitle.Text = "by: ritualz999"
+ritualSubtitle.Font = Enum.Font.GothamBold
+ritualSubtitle.TextSize = 10
+ritualSubtitle.TextColor3 = DARK_GOLD
+ritualSubtitle.TextXAlignment = Enum.TextXAlignment.Right
+ritualSubtitle.TextYAlignment = Enum.TextYAlignment.Center
+table.insert(themeTexts, ritualSubtitle)
+
+-- Background
+local bgDecor = Instance.new("ImageLabel", mainFrame)
+bgDecor.Name = "RitualBackground"
+bgDecor.Size = UDim2.new(1, 0, 1, 0)
+bgDecor.Position = UDim2.new(0, 0, 0, 0)
+bgDecor.BackgroundTransparency = 1
+bgDecor.ImageTransparency = 0.85
+bgDecor.ScaleType = Enum.ScaleType.Crop
+bgDecor.ZIndex = 0
+bgDecor.Image = "rbxassetid://132404081379154"
+Instance.new("UICorner", bgDecor).CornerRadius = UDim.new(0, 24)
+
+local topLabel = Instance.new("TextLabel", mainFrame)
+topLabel.Size = UDim2.new(0, 200, 0, 22)
+topLabel.Position = UDim2.new(0.5, -100, 0, 52)
+topLabel.BackgroundTransparency = 1
+topLabel.Text = "🎵 Discord: ritualz999"
+topLabel.Font = Enum.Font.GothamBold
+topLabel.TextSize = 10
+topLabel.TextColor3 = DARK_GOLD
+topLabel.TextStrokeTransparency = 0
+topLabel.TextStrokeColor3 = BLACK
+
+local controlsContainer = Instance.new("Frame", mainFrame)
+controlsContainer.Size = UDim2.new(0, 50, 0, 25)
+controlsContainer.Position = UDim2.new(1, -60, 0, 52)
+controlsContainer.BackgroundTransparency = 1
+
+function createTopControl(text, xOff, color, cb)
+    local btn = Instance.new("TextButton", controlsContainer)
+    btn.Size = UDim2.new(0, 22, 0, 22)
+    btn.Position = UDim2.new(0, xOff, 0, 0)
+    btn.BackgroundColor3 = BLACK
+    btn.BackgroundTransparency = 0
+    btn.Text = text
+    btn.Font = Enum.Font.GothamBlack
+    btn.TextSize = 14
+    btn.TextColor3 = color
+    btn.TextStrokeTransparency = 0
+    btn.TextStrokeColor3 = BLACK
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    local tcStroke = Instance.new("UIStroke", btn)
+    tcStroke.Color = color
+    tcStroke.Thickness = 1
+    btn.MouseButton1Click:Connect(cb)
+end
+
+createTopControl("-", 0, GOLD, function()
+    mainFrame.Visible = false
+    crownButton.Visible = true
+end)
+createTopControl("X", 26, RITUAL_RED, function()
+    screenGui:Destroy()
+    crownToggleGui:Destroy()
+    ClearESP()
+end)
+
+-- Hide crown when UI is open
+mainFrame:GetPropertyChangedSignal("Visible"):Connect(function()
+    if mainFrame.Visible then
+        crownButton.Visible = false
+    else
+        crownButton.Visible = true
+    end
+end)
+
+-- SIDEBAR
+local sidebar = Instance.new("Frame", mainFrame)
+sidebar.Size = UDim2.new(0, 115, 1, 0)
+sidebar.Position = UDim2.new(0, 10, 0, 0)
+sidebar.BackgroundTransparency = 1
 
 local sidebarScroll = Instance.new("ScrollingFrame", sidebar)
 sidebarScroll.Size = UDim2.new(1, 0, 1, -55)
@@ -2854,47 +2769,7 @@ sidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
 local sidebarPadding = Instance.new("UIPadding", sidebarScroll)
 sidebarPadding.PaddingLeft = UDim.new(0, 10)
 
-local activeTabBtn = nil
-for _, cat in ipairs(categories) do
-    local btn = Instance.new("TextButton", sidebarScroll)
-    btn.Text = cat.key
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 11
-    btn.TextColor3 = (cat.page == StatsPage) and GOLD or TEXT_WHITE
-    btn.Size = UDim2.new(1, -12, 0, 24)
-    btn.BackgroundTransparency = 1
-    btn.TextXAlignment = Enum.TextXAlignment.Left
-    cat.btn = btn
-
-    if cat.page == StatsPage then
-        activeTabBtn = btn
-        table.insert(themeTexts, btn)
-    end
-
-    btn.MouseButton1Click:Connect(function()
-        if activeTabBtn then
-            activeTabBtn.TextColor3 = TEXT_WHITE
-            local idx = table.find(themeTexts, activeTabBtn)
-            if idx then table.remove(themeTexts, idx) end
-        end
-        activeTabBtn = btn
-        table.insert(themeTexts, btn)
-        btn.TextColor3 = GOLD
-        StatsPage.Visible = false; CombatPage.Visible = false; GlitchesPage.Visible = false
-        CamLockPage.Visible = false; SoruPage.Visible = false
-        AppearancePage.Visible = false; SongsPage.Visible = false; BlacklistPage.Visible = false
-        SacredVFXPage.Visible = false; MiscPage.Visible = false
-        cat.page.Visible = true
-        if cat.key == "Soru" then
-            RightPanel.Visible = true
-            PagesContainer.Size = UDim2.new(0, 165, 1, -55)
-        else
-            RightPanel.Visible = false
-            PagesContainer.Size = UDim2.new(0, 320, 1, -55)
-        end
-    end)
-end
-
+-- PAGES
 local PagesContainer = Instance.new("Frame", mainFrame)
 PagesContainer.Size = UDim2.new(0, 320, 1, -55)
 PagesContainer.Position = UDim2.new(0, 125, 0, 45)
@@ -2935,6 +2810,54 @@ local SacredVFXPage = createScrollingPage()
 local MiscPage = createScrollingPage()
 StatsPage.Visible = true
 
+-- SIDEBAR BUTTONS
+local categories = {
+    { key = "Stats", page = StatsPage },
+    { key = "Combat", page = CombatPage },
+    { key = "Glitches", page = GlitchesPage },
+    { key = "ESP", page = CamLockPage },
+    { key = "Soru", page = SoruPage },
+    { key = "Appearance", page = AppearancePage },
+    { key = "Songs", page = SongsPage },
+    { key = "VFX", page = SacredVFXPage },
+    { key = "Misc", page = MiscPage },
+}
+
+local activeTabBtn = nil
+for _, cat in ipairs(categories) do
+    local btn = Instance.new("TextButton", sidebarScroll)
+    btn.Text = cat.key
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 11
+    btn.TextColor3 = (cat.page == StatsPage) and GOLD or TEXT_WHITE
+    btn.Size = UDim2.new(1, -12, 0, 24)
+    btn.BackgroundTransparency = 1
+    btn.TextXAlignment = Enum.TextXAlignment.Left
+    cat.btn = btn
+
+    if cat.page == StatsPage then
+        activeTabBtn = btn
+        table.insert(themeTexts, btn)
+    end
+
+    btn.MouseButton1Click:Connect(function()
+        if activeTabBtn then
+            activeTabBtn.TextColor3 = TEXT_WHITE
+            local idx = table.find(themeTexts, activeTabBtn)
+            if idx then table.remove(themeTexts, idx) end
+        end
+        activeTabBtn = btn
+        table.insert(themeTexts, btn)
+        btn.TextColor3 = GOLD
+        StatsPage.Visible = false; CombatPage.Visible = false; GlitchesPage.Visible = false
+        CamLockPage.Visible = false; SoruPage.Visible = false
+        AppearancePage.Visible = false; SongsPage.Visible = false; BlacklistPage.Visible = false
+        SacredVFXPage.Visible = false; MiscPage.Visible = false
+        cat.page.Visible = true
+    end)
+end
+
+-- RIGHT PANEL (for Soru target list)
 local RightPanel = Instance.new("Frame", mainFrame)
 RightPanel.Size = UDim2.new(0, 160, 1, -55)
 RightPanel.Position = UDim2.new(0, 295, 0, 45)
@@ -2973,11 +2896,9 @@ table.insert(themeStrokes, dlStroke)
 table.insert(themeTexts, DropLabel)
 
 -- ============================================================
--- POBLAR PESTAÑAS (COMBAT - CON AIMBOT Y FOV SLIDER)
+-- COMBAT TAB - Full Aimbot Section with all options
 -- ============================================================
-
--- COMBAT TAB - Aimbot Modules
-local c1 = createModuleCard("Aimbot Modules", 350, CombatPage)
+local c1 = createModuleCard("Aimbot Modules", 530, CombatPage)
 
 -- Aimbot Skills Toggle
 addToggleElement(c1, "Aimbot Skills", _G.G_SilentAimSkill, 24, function(v) 
@@ -3003,7 +2924,7 @@ addToggleElement(c1, "Show FOV Circle", _G.G_SilentAimShowFOV, 96, function(v)
     end
 end, "ShowFOV")
 
--- FOV Slider (aparece debajo de Show FOV Circle)
+-- FOV Slider
 local fovSliderLabel = Instance.new("TextLabel", c1)
 fovSliderLabel.Size = UDim2.new(1, -12, 0, 18)
 fovSliderLabel.Position = UDim2.new(0, 6, 0, 120)
@@ -3066,76 +2987,47 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
+-- NEW Silent Aim Options
+addToggleElement(c1, "Headshot Only", _G.G_SilentAimHeadshot, 164, function(v) 
+    _G.G_SilentAimHeadshot = v 
+end, "SilentAimHeadshot")
+
+addToggleElement(c1, "Wall Check", _G.G_SilentAimWallCheck, 188, function(v) 
+    _G.G_SilentAimWallCheck = v 
+end, "SilentAimWallCheck")
+
+addToggleElement(c1, "Prediction", _G.G_SilentAimPrediction, 212, function(v) 
+    _G.G_SilentAimPrediction = v 
+end, "SilentAimPrediction")
+
+addToggleElement(c1, "Lock On", _G.G_SilentAimLockOn, 236, function(v) 
+    _G.G_SilentAimLockOn = v 
+end, "SilentAimLockOn")
+
 -- Team Check
-addToggleElement(c1, "Team Check", _G.G_SilentAimTeamCheck, 166, function(v) 
+addToggleElement(c1, "Team Check", _G.G_SilentAimTeamCheck, 260, function(v) 
     _G.G_SilentAimTeamCheck = v 
 end, "TeamCheck")
 
 -- Ignore Safe Zone
-addToggleElement(c1, "Ignore Safe Zone", _G.G_AimbotSafeZoneCheck, 190, function(v) _G.G_AimbotSafeZoneCheck = v end, "AimbotSafeZone")
+addToggleElement(c1, "Ignore Safe Zone", _G.G_AimbotSafeZoneCheck, 284, function(v) _G.G_AimbotSafeZoneCheck = v end, "AimbotSafeZone")
 
 -- Ignore PvP OFF Players
-addToggleElement(c1, "Ignore PvP OFF Players", _G.G_AimbotPvPCheck, 214, function(v) _G.G_AimbotPvPCheck = v end, "AimbotPvP")
+addToggleElement(c1, "Ignore PvP OFF Players", _G.G_AimbotPvPCheck, 308, function(v) _G.G_AimbotPvPCheck = v end, "AimbotPvP")
 
 -- Rainbow Body ESP
-addToggleElement(c1, "Target Rainbow Body ESP", _G.G_TargetRainbowBodyESP, 238, function(v) _G.G_TargetRainbowBodyESP = v end, "RainbowBodyESP")
+addToggleElement(c1, "Target Rainbow Body ESP", _G.G_TargetRainbowBodyESP, 332, function(v) _G.G_TargetRainbowBodyESP = v end, "RainbowBodyESP")
 
 -- Aimbot Max Distance
-addStepper(c1, "Aimbot Max Dist:", 262, 100, 5000, 250, function() return maxRange end, function(v) maxRange = v end, "st")
-
--- Combat: Anti Stun and Hitbox Attack
-local antiStunCard = createModuleCard("Anti Stun and Hitbox Attack [Beta]", 50, CombatPage)
-addToggleElement(antiStunCard, "Anti Stun and Hitbox Attack [Beta]", AntiStunHitboxEnabled, 24, function(v)
-    if v then enableAntiStunHitbox() else disableAntiStunHitbox() end
-end, "AntiStunHitbox")
-
--- Combat: Fast Attack
-local c2 = createModuleCard("Fast Attack & Combat", 50, CombatPage)
-addToggleElement(c2, "Fast Attack", FastAttackEnabled, 24, function(v) FastAttackEnabled = v; if v then StartFastAttack() end end, "FastAttack")
-
--- Combat: Movement
-local c3 = createModuleCard("Movement", 220, CombatPage)
-addToggleElement(c3, "Walk Speed", WalkSpeedEnabled, 24, function(v) WalkSpeedEnabled = v end, "WalkSpeed")
-addStepper(c3, "Speed:", 48, 16, 500, 50, function() return WalkSpeedValue end, function(v) WalkSpeedValue = v end, "")
-
-RunService.Stepped:Connect(function()
-    if WalkSpeedEnabled and player.Character then
-        local hum = player.Character:FindFirstChildOfClass("Humanoid")
-        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-        if hum and hrp then
-            hum.WalkSpeed = WalkSpeedValue
-            if hum.MoveDirection.Magnitude > 0 and WalkSpeedValue > 20 then
-                hrp.CFrame = hrp.CFrame + (hum.MoveDirection * (WalkSpeedValue / 100))
-            end
-        end
-    end
-end)
-
-local setDashToggleState = addToggleElement(c3, "Dash Distance", DashEnabled, 88, function(v) 
-    DashEnabled = v 
-    if v then startDashLoop() else stopDashLoop() end 
-end, "Dash")
-local dashDistLabel = addStepper(c3, "Distance:", 116, 1, 300, 10, function() return DashLengthDist end, function(v) 
-    DashLengthDist = v
-    if DashEnabled then applyDashInstantly() end
-end, "")
-
-addToggleElement(c3, "Noclip", NoclipEnabled, 152, function(v) SetNoclip(v) end, "Noclip")
-addToggleElement(c3, "Walk on Water", WalkOnWaterEnabled, 176, function(v) WalkOnWaterEnabled = v end, "WalkOnWater")
-
--- Combat: Auto Race V4
-local autoV4Card = createModuleCard("Auto Race V4", 50, CombatPage)
-addToggleElement(autoV4Card, "Auto Race V4", AutoV4Enabled, 24, function(v)
-    AutoV4Enabled = v
-    if v then startAutoV4Loop() else stopAutoV4Loop() end
-end, "AutoV4")
+addStepper(c1, "Aimbot Max Dist:", 356, 100, 5000, 250, function() return maxRange end, function(v) maxRange = v end, "st")
 
 -- ============================================================
 -- LOAD CONFIG AND START
 -- ============================================================
 pcall(LoadConfig)
-pcall(LoadMacroConfig)
 centerAndMaximizeUI()
 
-print("⚜️ RITUAL HUB V1.0 LOADED | BLACK & GOLD THEME | by: ritualz999")
-print("🎯 Aimbot with FOV Circle | Skills lock onto targets inside the FOV circle")
+print("⚜️ RITUAL HUB V2.0 LOADED | BLACK & GOLD THEME | by: ritualz999")
+print("👑 Crown toggle button added - Pinky tip size, draggable & clickable")
+print("🎯 Silent Aim with FOV Circle & Advanced Options:")
+print("   • Headshot Only, Wall Check, Prediction, Lock On")
