@@ -1,5 +1,5 @@
 -- ============================================================
--- RITUAL HUB V2.0 | DELTA EXECUTOR | BLACK & GOLD THEME
+-- RITUAL HUB V2.1 | DELTA EXECUTOR | BLACK & GOLD THEME
 -- MADE BY: RITUALZ999
 -- ============================================================
 local Players = game:GetService("Players")
@@ -146,7 +146,6 @@ prevDashEnabled = false
 -- FOV CIRCLE
 -- ============================================================
 local FOVCircle = nil
-local FOVCircleVisible = false
 
 pcall(function()
     if Drawing and Drawing.new then
@@ -221,13 +220,13 @@ end)
 
 local mainFrame = nil
 local screenGui = nil
+local isUIOpen = false
 
 crownButton.MouseButton1Click:Connect(function()
     if mainFrame then
-        mainFrame.Visible = not mainFrame.Visible
-        if mainFrame.Visible then
-            crownButton.Visible = false
-        end
+        isUIOpen = not isUIOpen
+        mainFrame.Visible = isUIOpen
+        crownButton.Visible = not isUIOpen
     end
 end)
 
@@ -370,7 +369,6 @@ function LoadConfig()
             end
             if conf.AimbotMaxDist ~= nil then maxRange = conf.AimbotMaxDist end
             
-            -- New Silent Aim settings
             if conf.SilentAimHeadshot ~= nil then _G.G_SilentAimHeadshot = conf.SilentAimHeadshot end
             if conf.SilentAimWallCheck ~= nil then _G.G_SilentAimWallCheck = conf.SilentAimWallCheck end
             if conf.SilentAimPrediction ~= nil then _G.G_SilentAimPrediction = conf.SilentAimPrediction end
@@ -2201,7 +2199,8 @@ RunService.RenderStepped:Connect(function()
                 local viewportSize = cam.ViewportSize
                 FOVCircle.Position = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
                 FOVCircle.Radius = _G.G_SilentAimFOV or 150
-                FOVCircle.Visible = _G.G_SilentAimShowFOV and _G.G_SilentAimSkill
+                -- FOV circle visible when both Aimbot Skills AND Show FOV are enabled
+                FOVCircle.Visible = _G.G_SilentAimSkill and _G.G_SilentAimShowFOV
             end
         end
         
@@ -2213,7 +2212,6 @@ RunService.RenderStepped:Connect(function()
             elseif not _G.G_SilentAimLockOn then
                 currentSilentAimTarget = nil
             end
-            -- If lock-on is enabled, keep the last target
         else
             currentSilentAimTarget = nil
         end
@@ -2405,10 +2403,14 @@ function isColorLight(c3)
 end
 
 function centerAndMaximizeUI()
-    mainFrame.Visible = true
-    TweenService:Create(mainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-        Position = UDim2.new(0.5, -230, 0.5, -155)
-    }):Play()
+    if mainFrame then
+        mainFrame.Visible = true
+        isUIOpen = true
+        crownButton.Visible = false
+        TweenService:Create(mainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+            Position = UDim2.new(0.5, -230, 0.5, -155)
+        }):Play()
+    end
 end
 
 uiCardsRegistry = {}
@@ -2497,7 +2499,8 @@ function addToggleElement(parent, labelText, defaultState, yPos, callback, confi
             clickBtn.TextColor3 = TEXT_WHITE
             clickBtn.TextStrokeTransparency = 0
             clickBtn.TextStrokeColor3 = BLACK
-        end    end
+        end
+    end
 
     local function setExternalState(newState)
         state = newState
@@ -2635,7 +2638,7 @@ mainFrame.Size = UDim2.new(0, 480, 0, 315)
 mainFrame.Position = UDim2.new(0.5, -240, 0.5, -157)
 mainFrame.BackgroundColor3 = BLACK
 mainFrame.BackgroundTransparency = 0
-mainFrame.Visible = true
+mainFrame.Visible = false
 mainFrame.Active = true
 mainFrame.Draggable = true
 mainFrame.Parent = screenGui
@@ -2693,17 +2696,37 @@ bgDecor.ZIndex = 0
 bgDecor.Image = "rbxassetid://132404081379154"
 Instance.new("UICorner", bgDecor).CornerRadius = UDim.new(0, 24)
 
-local topLabel = Instance.new("TextLabel", mainFrame)
-topLabel.Size = UDim2.new(0, 200, 0, 22)
-topLabel.Position = UDim2.new(0.5, -100, 0, 52)
-topLabel.BackgroundTransparency = 1
-topLabel.Text = "🎵 Discord: ritualz999"
-topLabel.Font = Enum.Font.GothamBold
-topLabel.TextSize = 10
-topLabel.TextColor3 = DARK_GOLD
-topLabel.TextStrokeTransparency = 0
-topLabel.TextStrokeColor3 = BLACK
+-- DISCORD TAGS - Two lines: ritualz999 and rayo06996
+local discordContainer = Instance.new("Frame", mainFrame)
+discordContainer.Size = UDim2.new(0, 200, 0, 36)
+discordContainer.Position = UDim2.new(0.5, -100, 0, 52)
+discordContainer.BackgroundTransparency = 1
 
+local discord1 = Instance.new("TextLabel", discordContainer)
+discord1.Size = UDim2.new(1, 0, 0, 16)
+discord1.Position = UDim2.new(0, 0, 0, 0)
+discord1.BackgroundTransparency = 1
+discord1.Text = "Discord: ritualz999"
+discord1.Font = Enum.Font.GothamBold
+discord1.TextSize = 10
+discord1.TextColor3 = DARK_GOLD
+discord1.TextStrokeTransparency = 0
+discord1.TextStrokeColor3 = BLACK
+discord1.TextXAlignment = Enum.TextXAlignment.Center
+
+local discord2 = Instance.new("TextLabel", discordContainer)
+discord2.Size = UDim2.new(1, 0, 0, 16)
+discord2.Position = UDim2.new(0, 0, 0, 18)
+discord2.BackgroundTransparency = 1
+discord2.Text = "Discord: rayo06996"
+discord2.Font = Enum.Font.GothamBold
+discord2.TextSize = 10
+discord2.TextColor3 = DARK_GOLD
+discord2.TextStrokeTransparency = 0
+discord2.TextStrokeColor3 = BLACK
+discord2.TextXAlignment = Enum.TextXAlignment.Center
+
+-- Controls
 local controlsContainer = Instance.new("Frame", mainFrame)
 controlsContainer.Size = UDim2.new(0, 50, 0, 25)
 controlsContainer.Position = UDim2.new(1, -60, 0, 52)
@@ -2730,21 +2753,13 @@ end
 
 createTopControl("-", 0, GOLD, function()
     mainFrame.Visible = false
+    isUIOpen = false
     crownButton.Visible = true
 end)
 createTopControl("X", 26, RITUAL_RED, function()
     screenGui:Destroy()
     crownToggleGui:Destroy()
     ClearESP()
-end)
-
--- Hide crown when UI is open
-mainFrame:GetPropertyChangedSignal("Visible"):Connect(function()
-    if mainFrame.Visible then
-        crownButton.Visible = false
-    else
-        crownButton.Visible = true
-    end
 end)
 
 -- SIDEBAR
@@ -2857,44 +2872,6 @@ for _, cat in ipairs(categories) do
     end)
 end
 
--- RIGHT PANEL (for Soru target list)
-local RightPanel = Instance.new("Frame", mainFrame)
-RightPanel.Size = UDim2.new(0, 160, 1, -55)
-RightPanel.Position = UDim2.new(0, 295, 0, 45)
-RightPanel.BackgroundColor3 = DARK_BG
-RightPanel.BackgroundTransparency = 0.65
-RightPanel.Visible = false
-Instance.new("UICorner", RightPanel).CornerRadius = UDim.new(0, 8)
-local rpStroke = Instance.new("UIStroke", RightPanel)
-rpStroke.Color = GOLD
-rpStroke.Thickness = 1
-table.insert(themeStrokes, rpStroke)
-
-local ListScroll = Instance.new("ScrollingFrame", RightPanel)
-ListScroll.Size = UDim2.new(1, -10, 1, -30)
-ListScroll.Position = UDim2.new(0, 5, 0, 24)
-ListScroll.BackgroundTransparency = 1
-ListScroll.BorderSizePixel = 0
-ListScroll.ScrollBarThickness = 3
-ListScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-Instance.new("UIListLayout", ListScroll).Padding = UDim.new(0, 4)
-
-local DropLabel = Instance.new("TextButton", ListScroll)
-DropLabel.Name = "DropLabel"
-DropLabel.Size = UDim2.new(1, 0, 0, 24)
-DropLabel.BackgroundColor3 = BLACK
-DropLabel.BackgroundTransparency = 1
-DropLabel.Text = "🎯 Selector: Nearest"
-DropLabel.Font = Enum.Font.GothamBold
-DropLabel.TextColor3 = GOLD
-DropLabel.TextSize = 8.5
-Instance.new("UICorner", DropLabel).CornerRadius = UDim.new(0, 4)
-local dlStroke = Instance.new("UIStroke", DropLabel)
-dlStroke.Color = GOLD
-dlStroke.Thickness = 1
-table.insert(themeStrokes, dlStroke)
-table.insert(themeTexts, DropLabel)
-
 -- ============================================================
 -- COMBAT TAB - Full Aimbot Section with all options
 -- ============================================================
@@ -2903,7 +2880,9 @@ local c1 = createModuleCard("Aimbot Modules", 530, CombatPage)
 -- Aimbot Skills Toggle
 addToggleElement(c1, "Aimbot Skills", _G.G_SilentAimSkill, 24, function(v) 
     _G.G_SilentAimSkill = v 
-    if FOVCircle then FOVCircle.Visible = v and _G.G_SilentAimShowFOV end
+    if FOVCircle then 
+        FOVCircle.Visible = v and _G.G_SilentAimShowFOV
+    end
 end, "SkillAimbot")
 
 -- Target Players
@@ -3022,12 +3001,21 @@ addToggleElement(c1, "Target Rainbow Body ESP", _G.G_TargetRainbowBodyESP, 332, 
 addStepper(c1, "Aimbot Max Dist:", 356, 100, 5000, 250, function() return maxRange end, function(v) maxRange = v end, "st")
 
 -- ============================================================
+-- WIDGETS (Floating buttons)
+-- ============================================================
+function updateWidgetsVisuals()
+    -- Widgets are handled separately
+end
+
+-- ============================================================
 -- LOAD CONFIG AND START
 -- ============================================================
 pcall(LoadConfig)
 centerAndMaximizeUI()
 
-print("⚜️ RITUAL HUB V2.0 LOADED | BLACK & GOLD THEME | by: ritualz999")
-print("👑 Crown toggle button added - Pinky tip size, draggable & clickable")
+print("⚜️ RITUAL HUB V2.1 LOADED | BLACK & GOLD THEME | by: ritualz999")
+print("👑 Crown toggle button - Pinky tip size, draggable & clickable (fixed visibility)")
+print("📢 Discord: ritualz999 | Discord: rayo06996")
 print("🎯 Silent Aim with FOV Circle & Advanced Options:")
 print("   • Headshot Only, Wall Check, Prediction, Lock On")
+print("🟡 FOV Circle appears when Aimbot Skills AND Show FOV are ON")
