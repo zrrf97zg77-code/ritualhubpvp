@@ -60,19 +60,22 @@ popLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 -- BOTÓN IDIOMA
 local langBtn = Instance.new("TextButton", popFrame)
 langBtn.Size = UDim2.new(0, 50, 0, 20)
-langBtn.BackgroundColor3 = Color3.fromRGB(30, 25, 45)
+langBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- BLACK
 langBtn.Text = isSpanish and "ES 🌐" or "EN 🌐"
 langBtn.Font = Enum.Font.GothamBold
 langBtn.TextSize = 9
 langBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 langBtn.LayoutOrder = 0
 Instance.new("UICorner", langBtn).CornerRadius = UDim.new(0, 6)
+local langStroke = Instance.new("UIStroke", langBtn)
+langStroke.Color = Color3.fromRGB(255, 215, 0) -- GOLD
+langStroke.Thickness = 1
 
 -- TÍTULO
 local popTitle = Instance.new("TextLabel", popFrame)
 popTitle.AutomaticSize = Enum.AutomaticSize.XY
 popTitle.BackgroundTransparency = 1
-popTitle.Text = "✨ RITUAL HUB 12.5"
+popTitle.Text = "👑 RITUAL HUB 12.5"
 popTitle.Font = Enum.Font.GothamBlack
 popTitle.TextSize = 15
 popTitle.TextColor3 = Color3.fromRGB(255, 215, 0) -- GOLD TITLE
@@ -105,9 +108,9 @@ popContent.TextYAlignment = Enum.TextYAlignment.Top
 popContent.LayoutOrder = 3
 
 if isSpanish then
-    popContent.Text = "RITUAL HUB sin cooldown, Aimbot arreglado, Hitbox/Stun (Beta), Macro Config, Wallpapers, Songs y más.\n\n🟣 ¡El script ahora es SIN KEY! Solo presiona Empezar."
+    popContent.Text = "RITUAL HUB sin cooldown, Aimbot arreglado, Hitbox/Stun (Beta), Macro Config, Wallpapers, Songs y más.\n\n👑 ¡El script ahora es SIN KEY! Solo presiona Empezar."
 else
-    popContent.Text = "RITUAL HUB no cooldown, Aimbot fixed, Hitbox/Stun (Beta), Macro Config, Wallpapers, Songs & more.\n\n🟣 The script is now KEYLESS! Just click Get Started."
+    popContent.Text = "RITUAL HUB no cooldown, Aimbot fixed, Hitbox/Stun (Beta), Macro Config, Wallpapers, Songs & more.\n\n👑 The script is now KEYLESS! Just click Get Started."
 end
 
 -- BOTÓN GET STARTED
@@ -120,6 +123,9 @@ getStartedBtn.TextSize = 10
 getStartedBtn.TextColor3 = Color3.fromRGB(0, 0, 0) -- BLACK TEXT ON GOLD
 getStartedBtn.LayoutOrder = 4
 Instance.new("UICorner", getStartedBtn).CornerRadius = UDim.new(0, 8)
+local getStroke = Instance.new("UIStroke", getStartedBtn)
+getStroke.Color = Color3.fromRGB(255, 215, 0) -- GOLD
+getStroke.Thickness = 1.2
 
 -- FUNCIONES DE LOS BOTONES
 langBtn.MouseButton1Click:Connect(function()
@@ -128,9 +134,9 @@ langBtn.MouseButton1Click:Connect(function()
     getStartedBtn.Text = isSpanish and "Empezar" or "Get Started"
     popWarning.Text = isSpanish and "⚠️ NO USEN ESTA VERSIÓN DEL SCRIPT EN PC, UNA VERSIÓN PARA PC ESTARÁ DISPONIBLE PRONTO ⚠️" or "⚠️ DO NOT USE THIS SCRIPT VERSION ON PC, A PC VERSION WILL BE AVAILABLE SOON ⚠️"
     if isSpanish then
-        popContent.Text = "RITUAL HUB sin cooldown, Aimbot arreglado, Hitbox/Stun (Beta), Macro Config, Wallpapers, Songs y más.\n\n🟣 ¡El script ahora es SIN KEY! Solo presiona Empezar."
+        popContent.Text = "RITUAL HUB sin cooldown, Aimbot arreglado, Hitbox/Stun (Beta), Macro Config, Wallpapers, Songs y más.\n\n👑 ¡El script ahora es SIN KEY! Solo presiona Empezar."
     else
-        popContent.Text = "RITUAL HUB no cooldown, Aimbot fixed, Hitbox/Stun (Beta), Macro Config, Wallpapers, Songs & more.\n\n🟣 The script is now KEYLESS! Just click Get Started."
+        popContent.Text = "RITUAL HUB no cooldown, Aimbot fixed, Hitbox/Stun (Beta), Macro Config, Wallpapers, Songs & more.\n\n👑 The script is now KEYLESS! Just click Get Started."
     end
 end)
 
