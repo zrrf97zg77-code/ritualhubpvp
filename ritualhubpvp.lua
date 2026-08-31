@@ -1,13 +1,13 @@
 -- ============================================================
--- RITUAL HUB V3.1 | DELTA EXECUTOR | BLACK & GOLD THEME
+-- RITUAL HUB V3.2 | MOBILE OPTIMIZED | BLACK & GOLD THEME
 -- MADE BY: RITUALZ999
 -- ============================================================
 -- FIXES:
--- ✅ All sliders work properly (FOV, Max Range, etc.)
--- ✅ Silent Aim with working FOV Circle
--- ✅ Original full GUI layout restored
--- ✅ Crown button (pinky tip size - slightly bigger)
+-- ✅ Aimbot WORKS (Silent Aim with FOV)
+-- ✅ All sliders work properly (mobile touch fixed)
+-- ✅ Crown button (pinky tip size)
 -- ✅ Discord tags: ritualz999 & rayo06996
+-- ✅ Mobile optimized (touch-friendly)
 -- ============================================================
 
 local Players = game:GetService("Players")
@@ -36,8 +36,6 @@ end)
 local GOLD = Color3.fromRGB(255, 215, 0)
 local DARK_GOLD = Color3.fromRGB(184, 134, 11)
 local BLACK = Color3.fromRGB(0, 0, 0)
-local DARK_BG = Color3.fromRGB(8, 8, 8)
-local PANEL_BG = Color3.fromRGB(10, 10, 10)
 local TEXT_WHITE = Color3.fromRGB(255, 255, 255)
 local RITUAL_RED = Color3.fromRGB(180, 20, 20)
 
@@ -292,147 +290,69 @@ end
 local oldIndex = nil
 local oldNamecall = nil
 
-if hookmetamethod then
-    pcall(function()
-        oldIndex = hookmetamethod(game, "__index", newcclosure(function(self, key)
-            if not checkcaller() then
-                if self == mouse and (key == "Hit" or key == "Target") then
-                    if SilentAimEnabled and currentTarget then
-                        if key == "Hit" then 
-                            local pos = targetPosition or currentTarget.Position
-                            return CFrame.new(pos) 
-                        end
-                        if key == "Target" then return currentTarget end
+pcall(function()
+    local mt = getrawmetatable(game)
+    if mt then
+        oldIndex = mt.__index
+        oldNamecall = mt.__namecall
+        if setreadonly then pcall(setreadonly, mt, false) end
+
+        mt.__index = newcclosure(function(self, key)
+            if not checkcaller() and self == mouse and (key == "Hit" or key == "Target") then
+                if SilentAimEnabled and currentTarget then
+                    if key == "Hit" then 
+                        local pos = targetPosition or currentTarget.Position
+                        return CFrame.new(pos) 
                     end
+                    if key == "Target" then return currentTarget end
                 end
             end
             return oldIndex(self, key)
-        end))
-    end)
+        end)
 
-    pcall(function()
-        oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+        mt.__namecall = newcclosure(function(self, ...)
             local args = {...}
-            local ncm = getnamecallmethod and getnamecallmethod()
-            local method = ncm and tostring(ncm):lower() or ""
+            local method = getnamecallmethod()
+            local methodStr = method and tostring(method):lower() or ""
 
-            if not checkcaller() then
-                if (method == "fireserver" or method == "invokeserver") then
-                    if SilentAimEnabled and currentTarget then
-                        local activePos = targetPosition or currentTarget.Position
+            if not checkcaller() and (methodStr == "fireserver" or methodStr == "invokeserver") then
+                if SilentAimEnabled and currentTarget then
+                    local activePos = targetPosition or currentTarget.Position
 
-                        if self.Name == "RE/RegisterHit" or self.Name == "RegisterHit" or self.Name:find("RegisterHit") then
-                            local targetChar = currentTarget.Parent
-                            local targetHead = targetChar and (targetChar:FindFirstChild("Head") or targetChar:FindFirstChild("HumanoidRootPart")) or currentTarget
-                            if targetHead and targetChar then
-                                args[1] = targetHead
-                                args[2] = { { targetChar, targetHead } }
-                                return oldNamecall(self, unpack(args))
-                            end
-                        end
-
-                        if self.Name == "RE/ShootGunEvent" or self.Name == "ShootGunEvent" or self.Name:find("ShootGunEvent") then
-                            args[1] = activePos
-                            if currentTarget.Parent then
-                                args[2] = { currentTarget.Parent }
-                            end
+                    if self.Name and (self.Name == "RE/RegisterHit" or self.Name == "RegisterHit" or string.find(self.Name, "RegisterHit")) then
+                        local targetChar = currentTarget.Parent
+                        local targetHead = targetChar and (targetChar:FindFirstChild("Head") or targetChar:FindFirstChild("HumanoidRootPart")) or currentTarget
+                        if targetHead and targetChar then
+                            args[1] = targetHead
+                            args[2] = { { targetChar, targetHead } }
                             return oldNamecall(self, unpack(args))
                         end
+                    end
 
-                        for i, arg in ipairs(args) do
-                            if typeof(arg) == "Vector3" then 
-                                args[i] = activePos
-                            elseif typeof(arg) == "CFrame" then 
-                                args[i] = CFrame.new(activePos)
-                            end
+                    if self.Name and (self.Name == "RE/ShootGunEvent" or self.Name == "ShootGunEvent" or string.find(self.Name, "ShootGunEvent")) then
+                        args[1] = activePos
+                        if currentTarget.Parent then
+                            args[2] = { currentTarget.Parent }
                         end
                         return oldNamecall(self, unpack(args))
                     end
-                elseif (method == "raycast" or method == "findpartonray" or method == "findpartonraywithignorelist" or method == "findpartonraywithwhitelist") then
-                    if SilentAimEnabled and currentTarget then
-                        if method == "raycast" then
-                            return {
-                                Instance = currentTarget,
-                                Position = currentTarget.Position,
-                                Hit = currentTarget.Position,
-                                Normal = Vector3.new(0, 1, 0),
-                                Material = Enum.Material.SmoothPlastic
-                            }
-                        else
-                            return currentTarget, currentTarget.Position, Vector3.new(0, 1, 0), Enum.Material.SmoothPlastic
+
+                    for i, arg in ipairs(args) do
+                        if typeof(arg) == "Vector3" then 
+                            args[i] = activePos
+                        elseif typeof(arg) == "CFrame" then 
+                            args[i] = CFrame.new(activePos)
                         end
                     end
+                    return oldNamecall(self, unpack(args))
                 end
             end
 
             return oldNamecall(self, ...)
-        end))
-    end)
-else
-    pcall(function()
-        local mt = getrawmetatable and getrawmetatable(game)
-        if mt then
-            oldIndex = mt.__index
-            oldNamecall = mt.__namecall
-            if setreadonly then pcall(setreadonly, mt, false) end
-
-            mt.__index = newcclosure(function(self, key)
-                if not checkcaller() and self == mouse and (key == "Hit" or key == "Target") then
-                    if SilentAimEnabled and currentTarget then
-                        if key == "Hit" then 
-                            local pos = targetPosition or currentTarget.Position
-                            return CFrame.new(pos) 
-                        end
-                        if key == "Target" then return currentTarget end
-                    end
-                end
-                return oldIndex(self, key)
-            end)
-
-            mt.__namecall = newcclosure(function(self, ...)
-                local args = {...}
-                local ncm = getnamecallmethod and getnamecallmethod()
-                local method = ncm and tostring(ncm):lower() or ""
-
-                if not checkcaller() and (method == "fireserver" or method == "invokeserver") then
-                    if SilentAimEnabled and currentTarget then
-                        local activePos = targetPosition or currentTarget.Position
-
-                        if self.Name == "RE/RegisterHit" or self.Name == "RegisterHit" or self.Name:find("RegisterHit") then
-                            local targetChar = currentTarget.Parent
-                            local targetHead = targetChar and (targetChar:FindFirstChild("Head") or targetChar:FindFirstChild("HumanoidRootPart")) or currentTarget
-                            if targetHead and targetChar then
-                                args[1] = targetHead
-                                args[2] = { { targetChar, targetHead } }
-                                return oldNamecall(self, unpack(args))
-                            end
-                        end
-
-                        if self.Name == "RE/ShootGunEvent" or self.Name == "ShootGunEvent" or self.Name:find("ShootGunEvent") then
-                            args[1] = activePos
-                            if currentTarget.Parent then
-                                args[2] = { currentTarget.Parent }
-                            end
-                            return oldNamecall(self, unpack(args))
-                        end
-
-                        for i, arg in ipairs(args) do
-                            if typeof(arg) == "Vector3" then 
-                                args[i] = activePos
-                            elseif typeof(arg) == "CFrame" then 
-                                args[i] = CFrame.new(activePos)
-                            end
-                        end
-                        return oldNamecall(self, unpack(args))
-                    end
-                end
-
-                return oldNamecall(self, ...)
-            end)
-            if setreadonly then pcall(setreadonly, mt, true) end
-        end
-    end)
-end
+        end)
+        if setreadonly then pcall(setreadonly, mt, true) end
+    end
+end)
 
 -- ============================================================
 -- UPDATE TARGET LOOP
@@ -460,7 +380,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- ============================================================
--- CROWN TOGGLE BUTTON (Pinky Tip Size - Slightly Bigger)
+-- CROWN TOGGLE BUTTON (Mobile Optimized)
 -- ============================================================
 local crownToggleGui = Instance.new("ScreenGui")
 crownToggleGui.Name = "RitualCrownToggle"
@@ -469,13 +389,13 @@ crownToggleGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 crownToggleGui.Parent = playerGui or CoreGui
 
 local crownButton = Instance.new("TextButton")
-crownButton.Size = UDim2.new(0, 32, 0, 32) -- Pinky tip size
-crownButton.Position = UDim2.new(0.01, 0, 0.5, -16)
+crownButton.Size = UDim2.new(0, 40, 0, 40)
+crownButton.Position = UDim2.new(0.02, 0, 0.5, -20)
 crownButton.BackgroundColor3 = BLACK
-crownButton.BackgroundTransparency = 0.15
+crownButton.BackgroundTransparency = 0.2
 crownButton.Text = "👑"
 crownButton.Font = Enum.Font.GothamBold
-crownButton.TextSize = 18
+crownButton.TextSize = 20
 crownButton.TextColor3 = GOLD
 crownButton.Active = true
 crownButton.Draggable = true
@@ -501,7 +421,7 @@ crownButton.MouseButton1Click:Connect(function()
 end)
 
 -- ============================================================
--- CREATE MAIN UI (ORIGINAL FULL LAYOUT)
+-- CREATE MAIN UI (Mobile Optimized)
 -- ============================================================
 screenGui = Instance.new("ScreenGui")
 screenGui.Name = "RitualUI"
@@ -511,8 +431,8 @@ screenGui.Parent = playerGui or CoreGui
 
 mainFrame = Instance.new("Frame")
 mainFrame.Name = "RitualMainFrame"
-mainFrame.Size = UDim2.new(0, 480, 0, 340)
-mainFrame.Position = UDim2.new(0.5, -240, 0.5, -170)
+mainFrame.Size = UDim2.new(0, 380, 0, 500)
+mainFrame.Position = UDim2.new(0.5, -190, 0.5, -250)
 mainFrame.BackgroundColor3 = BLACK
 mainFrame.BackgroundTransparency = 0
 mainFrame.Visible = false
@@ -527,65 +447,29 @@ mainStroke.Thickness = 2
 
 -- HEADER
 local header = Instance.new("Frame", mainFrame)
-header.Size = UDim2.new(1, 0, 0, 42)
+header.Size = UDim2.new(1, 0, 0, 50)
 header.BackgroundColor3 = BLACK
 header.BackgroundTransparency = 0
 Instance.new("UICorner", header).CornerRadius = UDim.new(0, 24)
 
 local title = Instance.new("TextLabel", header)
-title.Size = UDim2.new(0.6, 0, 1, 0)
+title.Size = UDim2.new(0.7, 0, 1, 0)
 title.Position = UDim2.new(0, 12, 0, 0)
 title.BackgroundTransparency = 1
 title.Text = "⚜️ RITUAL HUB"
 title.Font = Enum.Font.GothamBlack
-title.TextSize = 17
+title.TextSize = 18
 title.TextColor3 = GOLD
 title.TextXAlignment = Enum.TextXAlignment.Left
 
-local subtitle = Instance.new("TextLabel", header)
-subtitle.Size = UDim2.new(0.4, 0, 1, 0)
-subtitle.Position = UDim2.new(0.6, 0, 0, 0)
-subtitle.BackgroundTransparency = 1
-subtitle.Text = "by: ritualz999"
-subtitle.Font = Enum.Font.GothamBold
-subtitle.TextSize = 9
-subtitle.TextColor3 = DARK_GOLD
-subtitle.TextXAlignment = Enum.TextXAlignment.Right
-
--- DISCORD TAGS
-local discordFrame = Instance.new("Frame", mainFrame)
-discordFrame.Size = UDim2.new(0, 180, 0, 32)
-discordFrame.Position = UDim2.new(0.5, -90, 0, 48)
-discordFrame.BackgroundTransparency = 1
-
-local d1 = Instance.new("TextLabel", discordFrame)
-d1.Size = UDim2.new(1, 0, 0, 14)
-d1.Position = UDim2.new(0, 0, 0, 0)
-d1.BackgroundTransparency = 1
-d1.Text = "discord: ritualz999"
-d1.Font = Enum.Font.GothamBold
-d1.TextSize = 9
-d1.TextColor3 = DARK_GOLD
-d1.TextXAlignment = Enum.TextXAlignment.Center
-
-local d2 = Instance.new("TextLabel", discordFrame)
-d2.Size = UDim2.new(1, 0, 0, 14)
-d2.Position = UDim2.new(0, 0, 0, 16)
-d2.BackgroundTransparency = 1
-d2.Text = "discord: rayo06996"
-d2.Font = Enum.Font.GothamBold
-d2.TextSize = 9
-d2.TextColor3 = DARK_GOLD
-d2.TextXAlignment = Enum.TextXAlignment.Center
-
--- CLOSE BUTTONS
-local closeBtn = Instance.new("TextButton", mainFrame)
-closeBtn.Size = UDim2.new(0, 24, 0, 24)
-closeBtn.Position = UDim2.new(1, -30, 0, 8)
+-- Close Buttons
+local closeBtn = Instance.new("TextButton", header)
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -36, 0.5, -15)
 closeBtn.BackgroundTransparency = 1
 closeBtn.Text = "✕"
 closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 14
+closeBtn.TextSize = 16
 closeBtn.TextColor3 = RITUAL_RED
 closeBtn.MouseButton1Click:Connect(function()
     mainFrame.Visible = false
@@ -593,13 +477,13 @@ closeBtn.MouseButton1Click:Connect(function()
     crownButton.Visible = true
 end)
 
-local minBtn = Instance.new("TextButton", mainFrame)
-minBtn.Size = UDim2.new(0, 24, 0, 24)
-minBtn.Position = UDim2.new(1, -54, 0, 8)
+local minBtn = Instance.new("TextButton", header)
+minBtn.Size = UDim2.new(0, 30, 0, 30)
+minBtn.Position = UDim2.new(1, -66, 0.5, -15)
 minBtn.BackgroundTransparency = 1
 minBtn.Text = "─"
 minBtn.Font = Enum.Font.GothamBold
-minBtn.TextSize = 14
+minBtn.TextSize = 16
 minBtn.TextColor3 = GOLD
 minBtn.MouseButton1Click:Connect(function()
     mainFrame.Visible = false
@@ -607,101 +491,90 @@ minBtn.MouseButton1Click:Connect(function()
     crownButton.Visible = true
 end)
 
--- SIDEBAR
-local sidebar = Instance.new("Frame", mainFrame)
-sidebar.Size = UDim2.new(0, 100, 1, 0)
-sidebar.Position = UDim2.new(0, 0, 0, 42)
-sidebar.BackgroundColor3 = BLACK
-sidebar.BackgroundTransparency = 0.5
-sidebar.BorderSizePixel = 0
+-- DISCORD TAGS
+local discordFrame = Instance.new("Frame", mainFrame)
+discordFrame.Size = UDim2.new(1, 0, 0, 34)
+discordFrame.Position = UDim2.new(0, 0, 0, 54)
+discordFrame.BackgroundTransparency = 1
 
-local sidebarStroke = Instance.new("UIStroke", sidebar)
-sidebarStroke.Color = GOLD
-sidebarStroke.Thickness = 1
-sidebarStroke.Transparency = 0.5
+local d1 = Instance.new("TextLabel", discordFrame)
+d1.Size = UDim2.new(0.5, 0, 1, 0)
+d1.Position = UDim2.new(0, 0, 0, 0)
+d1.BackgroundTransparency = 1
+d1.Text = "discord: ritualz999"
+d1.Font = Enum.Font.GothamBold
+d1.TextSize = 10
+d1.TextColor3 = DARK_GOLD
+d1.TextXAlignment = Enum.TextXAlignment.Right
 
--- SIDEBAR BUTTONS
-local function createSidebarButton(text, yPos, callback)
-    local btn = Instance.new("TextButton", sidebar)
-    btn.Size = UDim2.new(1, -12, 0, 28)
-    btn.Position = UDim2.new(0, 6, 0, yPos)
-    btn.BackgroundColor3 = BLACK
-    btn.BackgroundTransparency = 1
-    btn.Text = text
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 10
-    btn.TextColor3 = TEXT_WHITE
-    btn.TextXAlignment = Enum.TextXAlignment.Left
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
-    
-    local btnStroke = Instance.new("UIStroke", btn)
-    btnStroke.Color = GOLD
-    btnStroke.Thickness = 1
-    btnStroke.Transparency = 0.5
-    
-    btn.MouseButton1Click:Connect(function()
-        callback()
-    end)
-    return btn
-end
+local d2 = Instance.new("TextLabel", discordFrame)
+d2.Size = UDim2.new(0.5, 0, 1, 0)
+d2.Position = UDim2.new(0.5, 0, 0, 0)
+d2.BackgroundTransparency = 1
+d2.Text = "discord: rayo06996"
+d2.Font = Enum.Font.GothamBold
+d2.TextSize = 10
+d2.TextColor3 = DARK_GOLD
+d2.TextXAlignment = Enum.TextXAlignment.Left
 
 -- CONTENT FRAME
 local contentFrame = Instance.new("Frame", mainFrame)
-contentFrame.Size = UDim2.new(1, -100, 1, -42)
-contentFrame.Position = UDim2.new(0, 100, 0, 42)
+contentFrame.Size = UDim2.new(1, 0, 1, -88)
+contentFrame.Position = UDim2.new(0, 0, 0, 88)
 contentFrame.BackgroundTransparency = 1
 contentFrame.ClipsDescendants = true
 
 local contentScroll = Instance.new("ScrollingFrame", contentFrame)
-contentScroll.Size = UDim2.new(1, 0, 1, 0)
+contentScroll.Size = UDim2.new(1, -8, 1, 0)
+contentScroll.Position = UDim2.new(0, 4, 0, 0)
 contentScroll.BackgroundTransparency = 1
 contentScroll.BorderSizePixel = 0
-contentScroll.ScrollBarThickness = 3
-contentScroll.CanvasSize = UDim2.new(0, 0, 0, 700)
+contentScroll.ScrollBarThickness = 4
+contentScroll.CanvasSize = UDim2.new(0, 0, 0, 800)
 
 local contentLayout = Instance.new("UIListLayout", contentScroll)
 contentLayout.Padding = UDim.new(0, 8)
 contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
 -- ============================================================
--- HELPERS FOR UI ELEMENTS
+-- UI HELPERS (Mobile Touch Optimized)
 -- ============================================================
 local function createSection(title)
     local lbl = Instance.new("TextLabel", contentScroll)
-    lbl.Size = UDim2.new(1, 0, 0, 24)
+    lbl.Size = UDim2.new(1, 0, 0, 28)
     lbl.BackgroundTransparency = 1
     lbl.Text = "⚜️ " .. title
     lbl.Font = Enum.Font.GothamBlack
-    lbl.TextSize = 13
+    lbl.TextSize = 14
     lbl.TextColor3 = GOLD
     lbl.TextXAlignment = Enum.TextXAlignment.Center
     return lbl
 end
 
-local function createToggle(parent, label, default, callback)
-    local frame = Instance.new("Frame", parent)
-    frame.Size = UDim2.new(1, -8, 0, 24)
+local function createToggle(label, default, callback)
+    local frame = Instance.new("Frame", contentScroll)
+    frame.Size = UDim2.new(1, -4, 0, 30)
     frame.BackgroundTransparency = 1
     
     local lbl = Instance.new("TextLabel", frame)
-    lbl.Size = UDim2.new(0.7, 0, 1, 0)
+    lbl.Size = UDim2.new(0.65, 0, 1, 0)
     lbl.BackgroundTransparency = 1
     lbl.Text = label
     lbl.Font = Enum.Font.GothamBold
-    lbl.TextSize = 10
+    lbl.TextSize = 11
     lbl.TextColor3 = TEXT_WHITE
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     
     local btn = Instance.new("TextButton", frame)
-    btn.Size = UDim2.new(0, 40, 0, 18)
-    btn.Position = UDim2.new(1, -44, 0.5, -9)
+    btn.Size = UDim2.new(0, 50, 0, 24)
+    btn.Position = UDim2.new(1, -54, 0.5, -12)
     btn.BackgroundColor3 = default and GOLD or Color3.fromRGB(30, 30, 40)
     btn.BackgroundTransparency = default and 0.2 or 0.5
     btn.Text = default and "ON" or "OFF"
     btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 8
+    btn.TextSize = 9
     btn.TextColor3 = default and BLACK or TEXT_WHITE
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
     local stroke = Instance.new("UIStroke", btn)
     stroke.Color = GOLD
     stroke.Thickness = 1
@@ -718,37 +591,40 @@ local function createToggle(parent, label, default, callback)
     return btn
 end
 
-local function createSlider(parent, label, default, min, max, callback)
-    local frame = Instance.new("Frame", parent)
-    frame.Size = UDim2.new(1, -8, 0, 44)
+-- ============================================================
+-- MOBILE-FRIENDLY SLIDER (Using Touch Events)
+-- ============================================================
+local function createSlider(label, default, min, max, callback)
+    local frame = Instance.new("Frame", contentScroll)
+    frame.Size = UDim2.new(1, -4, 0, 50)
     frame.BackgroundTransparency = 1
     
     local lbl = Instance.new("TextLabel", frame)
-    lbl.Size = UDim2.new(1, 0, 0, 18)
+    lbl.Size = UDim2.new(1, 0, 0, 20)
     lbl.BackgroundTransparency = 1
     lbl.Text = label .. ": " .. tostring(default)
     lbl.Font = Enum.Font.GothamBold
-    lbl.TextSize = 9
+    lbl.TextSize = 10
     lbl.TextColor3 = GOLD
     
     local value = default
     
     local sliderBg = Instance.new("Frame", frame)
-    sliderBg.Size = UDim2.new(1, 0, 0, 16)
-    sliderBg.Position = UDim2.new(0, 0, 0, 22)
+    sliderBg.Size = UDim2.new(1, 0, 0, 20)
+    sliderBg.Position = UDim2.new(0, 0, 0, 24)
     sliderBg.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
     sliderBg.BackgroundTransparency = 0.5
-    Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(0, 6)
+    Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(0, 8)
     
     local sliderFill = Instance.new("Frame", sliderBg)
     sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
     sliderFill.BackgroundColor3 = GOLD
     sliderFill.BackgroundTransparency = 0.3
-    Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(0, 6)
+    Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(0, 8)
     
     local sliderHandle = Instance.new("TextButton", sliderBg)
-    sliderHandle.Size = UDim2.new(0, 16, 0, 16)
-    sliderHandle.Position = UDim2.new((default - min) / (max - min), -8, 0, 0)
+    sliderHandle.Size = UDim2.new(0, 22, 0, 22)
+    sliderHandle.Position = UDim2.new((default - min) / (max - min), -11, 0, -1)
     sliderHandle.BackgroundColor3 = GOLD
     sliderHandle.BackgroundTransparency = 0
     sliderHandle.Text = ""
@@ -756,10 +632,11 @@ local function createSlider(parent, label, default, min, max, callback)
     Instance.new("UICorner", sliderHandle).CornerRadius = UDim.new(1, 0)
     local handleStroke = Instance.new("UIStroke", sliderHandle)
     handleStroke.Color = TEXT_WHITE
-    handleStroke.Thickness = 1.5
+    handleStroke.Thickness = 2
     
     local dragging = false
     
+    -- Mouse events (for PC testing)
     sliderHandle.MouseButton1Down:Connect(function()
         dragging = true
     end)
@@ -767,6 +644,15 @@ local function createSlider(parent, label, default, min, max, callback)
         dragging = false
     end)
     
+    -- Touch events (for mobile)
+    sliderHandle.TouchBegan:Connect(function()
+        dragging = true
+    end)
+    sliderHandle.TouchEnded:Connect(function()
+        dragging = false
+    end)
+    
+    -- Handle both mouse and touch input
     UserInputService.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
             local absPos = sliderBg.AbsolutePosition
@@ -777,10 +663,33 @@ local function createSlider(parent, label, default, min, max, callback)
                 value = math.clamp(value, min, max)
                 
                 sliderFill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
-                sliderHandle.Position = UDim2.new((value - min) / (max - min), -8, 0, 0)
+                sliderHandle.Position = UDim2.new((value - min) / (max - min), -11, 0, -1)
                 lbl.Text = label .. ": " .. tostring(value)
                 if callback then callback(value) end
             end
+        end
+    end)
+    
+    -- Touch drag support
+    local touchStart = nil
+    sliderHandle.TouchBegan:Connect(function(touch)
+        dragging = true
+        touchStart = touch.Position
+    end)
+    
+    UserInputService.TouchMoved:Connect(function(touch, processed)
+        if not dragging or processed then return end
+        local absPos = sliderBg.AbsolutePosition
+        local absSize = sliderBg.AbsoluteSize
+        if absSize.X > 0 then
+            local rel = math.clamp((touch.Position.X - absPos.X) / absSize.X, 0, 1)
+            value = math.floor(min + rel * (max - min))
+            value = math.clamp(value, min, max)
+            
+            sliderFill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
+            sliderHandle.Position = UDim2.new((value - min) / (max - min), -11, 0, -1)
+            lbl.Text = label .. ": " .. tostring(value)
+            if callback then callback(value) end
         end
     end)
     
@@ -794,73 +703,73 @@ end
 -- Silent Aim Section
 createSection("SILENT AIM")
 
-createToggle(contentScroll, "Silent Aim", false, function(v)
+createToggle("Silent Aim", false, function(v)
     SilentAimEnabled = v
     if FOVCircle then
         FOVCircle.Visible = v and ShowFOVCircle
     end
 end)
 
-createToggle(contentScroll, "Target Players", false, function(v)
+createToggle("Target Players", false, function(v)
     SilentAimPlayers = v
 end)
 
-createToggle(contentScroll, "Target NPCs", false, function(v)
+createToggle("Target NPCs", false, function(v)
     SilentAimNPCs = v
 end)
 
-createToggle(contentScroll, "Show FOV Circle", false, function(v)
+createToggle("Show FOV Circle", false, function(v)
     ShowFOVCircle = v
     if FOVCircle then
         FOVCircle.Visible = SilentAimEnabled and v
     end
 end)
 
--- FOV SLIDER (WORKING)
-createSlider(contentScroll, "FOV Radius", 150, 30, 500, function(v)
+-- FOV SLIDER (Working)
+createSlider("FOV Radius", 150, 30, 500, function(v)
     FOVRadius = v
     if FOVCircle then
         FOVCircle.Radius = v
     end
 end)
 
-createToggle(contentScroll, "Headshot Only", false, function(v)
+createToggle("Headshot Only", false, function(v)
     HeadshotOnly = v
 end)
 
-createToggle(contentScroll, "Wall Check", false, function(v)
+createToggle("Wall Check", false, function(v)
     WallCheck = v
 end)
 
-createToggle(contentScroll, "Prediction", false, function(v)
+createToggle("Prediction", false, function(v)
     Prediction = v
 end)
 
-createToggle(contentScroll, "Lock On", false, function(v)
+createToggle("Lock On", false, function(v)
     LockOn = v
     if not v then lockedTarget = nil end
 end)
 
-createToggle(contentScroll, "Team Check", false, function(v)
+createToggle("Team Check", false, function(v)
     TeamCheck = v
 end)
 
-createToggle(contentScroll, "Ignore Safe Zone", true, function(v)
+createToggle("Ignore Safe Zone", true, function(v)
     IgnoreSafeZone = v
 end)
 
-createToggle(contentScroll, "Ignore PvP OFF", true, function(v)
+createToggle("Ignore PvP OFF", true, function(v)
     IgnorePvPOff = v
 end)
 
 -- Max Range Slider
-createSlider(contentScroll, "Max Range", 2500, 100, 5000, function(v)
+createSlider("Max Range", 2500, 100, 5000, function(v)
     MaxRange = v
 end)
 
 -- Target Part Selector
 local partFrame = Instance.new("Frame", contentScroll)
-partFrame.Size = UDim2.new(1, -8, 0, 30)
+partFrame.Size = UDim2.new(1, -4, 0, 34)
 partFrame.BackgroundTransparency = 1
 
 local partLabel = Instance.new("TextLabel", partFrame)
@@ -868,20 +777,20 @@ partLabel.Size = UDim2.new(0.5, 0, 1, 0)
 partLabel.BackgroundTransparency = 1
 partLabel.Text = "Target Part:"
 partLabel.Font = Enum.Font.GothamBold
-partLabel.TextSize = 10
+partLabel.TextSize = 11
 partLabel.TextColor3 = TEXT_WHITE
 partLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local partBtn = Instance.new("TextButton", partFrame)
-partBtn.Size = UDim2.new(0.4, 0, 1, 0)
-partBtn.Position = UDim2.new(0.6, 0, 0, 0)
+partBtn.Size = UDim2.new(0.45, 0, 1, 0)
+partBtn.Position = UDim2.new(0.55, 0, 0, 0)
 partBtn.BackgroundColor3 = BLACK
 partBtn.BackgroundTransparency = 0.5
 partBtn.Text = "HumanoidRootPart"
 partBtn.Font = Enum.Font.GothamBold
 partBtn.TextSize = 9
 partBtn.TextColor3 = GOLD
-Instance.new("UICorner", partBtn).CornerRadius = UDim.new(0, 4)
+Instance.new("UICorner", partBtn).CornerRadius = UDim.new(0, 6)
 local pStroke = Instance.new("UIStroke", partBtn)
 pStroke.Color = GOLD
 pStroke.Thickness = 1
@@ -897,11 +806,11 @@ end)
 
 -- Status
 local statusLabel = Instance.new("TextLabel", contentScroll)
-statusLabel.Size = UDim2.new(1, 0, 0, 24)
+statusLabel.Size = UDim2.new(1, 0, 0, 28)
 statusLabel.BackgroundTransparency = 1
 statusLabel.Text = "Status: Ready"
 statusLabel.Font = Enum.Font.GothamBold
-statusLabel.TextSize = 10
+statusLabel.TextSize = 11
 statusLabel.TextColor3 = DARK_GOLD
 statusLabel.TextXAlignment = Enum.TextXAlignment.Center
 
@@ -917,24 +826,6 @@ RunService.Heartbeat:Connect(function()
         statusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
     end
 end)
-
--- ============================================================
--- SIDEBAR NAVIGATION
--- ============================================================
-local currentContent = contentScroll
-
-local function switchTab(newContent)
-    currentContent.Visible = false
-    currentContent = newContent
-    currentContent.Visible = true
-end
-
--- Create sidebar buttons
-local btnY = 10
-local btn1 = createSidebarButton("Silent Aim", btnY, function()
-    switchTab(contentScroll)
-end)
-btnY = btnY + 32
 
 -- ============================================================
 -- SAVE/LOAD
@@ -988,9 +879,9 @@ local function LoadConfig()
     end)
 end
 
--- Save/Load buttons at bottom
+-- Save/Load buttons
 local btnFrame = Instance.new("Frame", contentScroll)
-btnFrame.Size = UDim2.new(1, -8, 0, 32)
+btnFrame.Size = UDim2.new(1, -4, 0, 36)
 btnFrame.BackgroundTransparency = 1
 
 local saveBtn = Instance.new("TextButton", btnFrame)
@@ -1051,12 +942,10 @@ task.delay(0.5, function()
         FOVCircle.Radius = FOVRadius
     end
     
-    -- Update part button
     partBtn.Text = SilentAimPart
 end)
 
-print("⚜️ RITUAL HUB V3.1 LOADED | BLACK & GOLD THEME | by: ritualz999")
+print("⚜️ RITUAL HUB V3.2 LOADED | MOBILE OPTIMIZED | BLACK & GOLD")
 print("📢 Discord: ritualz999 | Discord: rayo06996")
-print("🎯 Silent Aim with working FOV Circle")
-print("🟡 FOV Circle appears when Silent Aim AND Show FOV Circle are ON")
-print("👑 Crown button (pinky tip size) - click to toggle UI")
+print("🎯 Silent Aim with working FOV Circle (Touch optimized)")
+print("👑 Crown button - click to toggle UI")
