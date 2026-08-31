@@ -1,5 +1,5 @@
 -- ============================================================
--- RITUAL HUB V12.5 | BLACK & GOLD | FOV AIMBOT
+-- RITUAL HUB V12.5 (MOBILE) | BLACK & GOLD | FOV AIMBOT
 -- ============================================================
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
@@ -11,7 +11,7 @@ for _, v in pairs(playerGui:GetChildren()) do
 end
 
 -- ============================================================
--- POPUP (Black & Gold, no PC warning)
+-- POPUP (Black & Gold, mobile-friendly)
 -- ============================================================
 local continueEvent = Instance.new("BindableEvent")
 local launcherGui = Instance.new("ScreenGui")
@@ -20,13 +20,13 @@ launcherGui.ResetOnSpawn = false
 launcherGui.Parent = playerGui
 
 local popFrame = Instance.new("Frame", launcherGui)
-popFrame.Size = UDim2.new(0, 300, 0, 200)
-popFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
+popFrame.Size = UDim2.new(0, 280, 0, 190)
+popFrame.Position = UDim2.new(0.5, -140, 0.5, -95)
 popFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 popFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
 popFrame.BackgroundTransparency = 0
 popFrame.Active = true
-popFrame.Draggable = true
+popFrame.Draggable = false
 Instance.new("UICorner", popFrame).CornerRadius = UDim.new(0,12)
 local popStroke = Instance.new("UIStroke", popFrame)
 popStroke.Color = Color3.fromRGB(255,215,0)
@@ -34,19 +34,19 @@ popStroke.Thickness = 2
 
 local title = Instance.new("TextLabel", popFrame)
 title.Size = UDim2.new(1,0,0,30)
-title.Position = UDim2.new(0,0,0,12)
+title.Position = UDim2.new(0,0,0,10)
 title.BackgroundTransparency = 1
 title.Text = "✨ Ritual Hub 12.5"
 title.Font = Enum.Font.GothamBlack
-title.TextSize = 18
+title.TextSize = 16
 title.TextColor3 = Color3.fromRGB(255,215,0)
 title.TextXAlignment = Enum.TextXAlignment.Center
 
 local content = Instance.new("TextLabel", popFrame)
-content.Size = UDim2.new(1,-30,0,50)
-content.Position = UDim2.new(0,15,0,50)
+content.Size = UDim2.new(1,-20,0,60)
+content.Position = UDim2.new(0,10,0,45)
 content.BackgroundTransparency = 1
-content.Text = "FOV Aimbot • ESP • Movement • Glitches\nSoru Engine • Macro • Save/Load Config"
+content.Text = "FOV Aimbot • ESP • Movement\nGlitches • Soru • Save/Load"
 content.Font = Enum.Font.GothamBold
 content.TextSize = 11
 content.TextColor3 = Color3.fromRGB(200,200,200)
@@ -55,12 +55,12 @@ content.TextYAlignment = Enum.TextYAlignment.Top
 content.TextWrapped = true
 
 local startBtn = Instance.new("TextButton", popFrame)
-startBtn.Size = UDim2.new(0,120,0,32)
-startBtn.Position = UDim2.new(0.5,-60,1,-48)
+startBtn.Size = UDim2.new(0,120,0,34)
+startBtn.Position = UDim2.new(0.5,-60,1,-46)
 startBtn.BackgroundColor3 = Color3.fromRGB(255,215,0)
 startBtn.Text = "Get Started"
 startBtn.Font = Enum.Font.GothamBlack
-startBtn.TextSize = 12
+startBtn.TextSize = 13
 startBtn.TextColor3 = Color3.fromRGB(0,0,0)
 Instance.new("UICorner", startBtn).CornerRadius = UDim.new(0,8)
 
@@ -89,8 +89,6 @@ local mouse = player:GetMouse()
 -- CONFIG PERSISTENCE
 -- ============================================================
 local configFileName = "RitualHub_Config.json"
-local bountyFileName = "RitualHub_Bounty.json"
-local macroFileName = "RitualHub_Macro.json"
 
 function SaveConfig(data)
     pcall(function()
@@ -111,80 +109,39 @@ function LoadConfig()
 end
 
 -- ============================================================
--- STATE VARIABLES (defaults)
+-- STATE VARIABLES
 -- ============================================================
 local state = {
-    -- ESP
-    ESPEnabled = false,
-    ESPName = true,
-    ESPLevel = true,
-    ESPBounty = true,
-    ESPFruit = true,
-    ESPDist = true,
-    ESPHP = true,
-    ESPHighlight = false,
+    ESPEnabled = false, ESPName = true, ESPLevel = true, ESPBounty = true,
+    ESPFruit = true, ESPDist = true, ESPHP = true, ESPHighlight = false,
     ESPTextSize = 12,
-    
-    -- Combat
-    FastAttack = false,
-    WalkSpeed = false,
-    WalkSpeedVal = 16,
-    Dash = false,
-    DashDist = 1,
-    Noclip = false,
-    WalkOnWater = false,
-    
-    -- Glitches
-    SuperJump = false,
-    SuperJumpPower = 500,
-    NoAnim = false,
-    AntiLava = false,
+    FastAttack = false, WalkSpeed = false, WalkSpeedVal = 16,
+    Dash = false, DashDist = 1, Noclip = false, WalkOnWater = false,
+    SuperJump = false, SuperJumpPower = 500, NoAnim = false, AntiLava = false,
     FFlags = false,
-    Macro = false,
-    MacroMode = "Soru",
+    Macro = false, MacroMode = "Soru",
     MacroSlot1 = 1, MacroKey1 = "Z", MacroDelay1 = 0.3,
     MacroSlot2 = 2, MacroKey2 = "X", MacroDelay2 = 0.3,
     MacroSlot3 = 3, MacroKey3 = "C", MacroDelay3 = 0.3,
     MacroSlot4 = 4, MacroKey4 = "V", MacroDelay4 = 0.3,
     MacroSlot5 = 1, MacroKey5 = "OFF", MacroDelay5 = 0.3,
     MacroSlot6 = 1, MacroKey6 = "OFF", MacroDelay6 = 0.3,
-    
-    -- Soru
-    InfSoru = false,
-    SoruAimbot = false,
-    PortalSoru = false,
-    PortalSanguineC = false,
-    PortalSanguineCTrigger = "PortalF",
-    
-    -- Aimbot
-    SkillAimbot = false,
-    ShowFOV = false,
-    FOVRadius = 150,
-    ShowLine = false,
-    TargetPlayers = false,
-    TargetMobs = false,
-    TeamCheck = false,
-    IgnoreSafe = true,
-    IgnorePvPOff = true,
-    RainbowBody = false,
-    AimbotMaxDist = 2500,
-    SelectedTarget = "",
-    
-    -- Misc
-    FPSOverlay = false,
-    Language = "EN",
+    InfSoru = false, SoruAimbot = false, PortalSoru = false,
+    PortalSanguineC = false, PortalSanguineCTrigger = "PortalF",
+    SkillAimbot = false, ShowFOV = false, FOVRadius = 150,
+    ShowLine = false, TargetPlayers = false, TargetMobs = false,
+    TeamCheck = false, IgnoreSafe = true, IgnorePvPOff = true,
+    RainbowBody = false, AimbotMaxDist = 2500,
+    FPSOverlay = false, Language = "EN",
 }
 
--- Load saved config
+-- Load saved
 local saved = LoadConfig()
 for k,v in pairs(saved) do
     if state[k] ~= nil then state[k] = v end
 end
 
--- Save function wrapper
-function SaveAll()
-    SaveConfig(state)
-end
+function SaveAll() SaveConfig(state) end
 
 -- ============================================================
 -- HELPER FUNCTIONS
@@ -203,7 +160,6 @@ local function isPvPOn(p)
     if state.IgnorePvPOff then
         local attr = p:GetAttribute("PvpDisabled")
         if attr == true then return false end
-        -- Check GUI PvP button
         local main = p.PlayerGui:FindFirstChild("Main")
         if main then
             local dis = main:FindFirstChild("PvpDisabled")
@@ -235,7 +191,6 @@ local function getTargets()
     local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
     if not myHRP then return targets end
     local myPos = myHRP.Position
-    
     if state.TargetPlayers then
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= player and p.Character then
@@ -269,7 +224,7 @@ local function getTargets()
 end
 
 -- ============================================================
--- FOV & TARGET LINE (using Drawing)
+-- FOV & TARGET LINE (Drawing)
 -- ============================================================
 local FOVCircle = nil
 local TargetLine = nil
@@ -292,7 +247,6 @@ end)
 
 local currentTargetPart = nil
 
--- Convert world to screen and check FOV
 local function getTargetInFOV()
     local cam = workspace.CurrentCamera
     local screenCenter = Vector2.new(cam.ViewportSize.X/2, cam.ViewportSize.Y/2)
@@ -316,27 +270,20 @@ local function getTargetInFOV()
     return bestPart
 end
 
--- Update line and circle
 RunService.RenderStepped:Connect(function()
     local cam = workspace.CurrentCamera
     if not cam then return end
     local screenCenter = Vector2.new(cam.ViewportSize.X/2, cam.ViewportSize.Y/2)
-    
-    -- FOV Circle
     if FOVCircle then
         FOVCircle.Visible = state.ShowFOV and state.SkillAimbot
         FOVCircle.Radius = state.FOVRadius
         FOVCircle.Position = screenCenter
     end
-    
-    -- Update target
     if state.SkillAimbot then
         currentTargetPart = getTargetInFOV()
     else
         currentTargetPart = nil
     end
-    
-    -- Target Line
     if TargetLine then
         if currentTargetPart and state.ShowLine then
             local screenPos, onScreen = cam:WorldToViewportPoint(currentTargetPart.Position)
@@ -366,15 +313,7 @@ if hookmetamethod then
                     if key == "Target" then return currentTargetPart end
                 end
                 if state.SoruAimbot then
-                    -- Soru Aimbot (teleport to target) – kept simple
-                    local targetName = SelectedSoruTarget or "Nearest"
-                    local targetChar
-                    if targetName == "Nearest" then
-                        targetChar = getTargets()[1] and getTargets()[1].char
-                    else
-                        local p = Players:FindFirstChild(targetName)
-                        if p then targetChar = p.Character end
-                    end
+                    local targetChar = getTargets()[1] and getTargets()[1].char
                     if targetChar then
                         local hrp = targetChar:FindFirstChild("HumanoidRootPart")
                         if hrp then
@@ -393,15 +332,10 @@ if hookmetamethod then
             local method = getnamecallmethod()
             if not checkcaller() and (method == "FireServer" or method == "InvokeServer") then
                 if state.SkillAimbot and currentTargetPart then
-                    -- Override position arguments
                     for i,arg in ipairs(args) do
-                        if typeof(arg) == "Vector3" then
-                            args[i] = currentTargetPart.Position
-                        elseif typeof(arg) == "CFrame" then
-                            args[i] = CFrame.new(currentTargetPart.Position)
-                        end
+                        if typeof(arg) == "Vector3" then args[i] = currentTargetPart.Position end
+                        if typeof(arg) == "CFrame" then args[i] = CFrame.new(currentTargetPart.Position) end
                     end
-                    -- Special handling for RegisterHit
                     if self.Name:find("RegisterHit") then
                         local parent = currentTargetPart.Parent
                         if parent then
@@ -423,7 +357,6 @@ if hookmetamethod then
         end))
     end)
 else
-    -- Fallback for executors without hookmetamethod
     pcall(function()
         local mt = getrawmetatable(game)
         if mt then
@@ -467,10 +400,9 @@ else
 end
 
 -- ============================================================
--- ESP SYSTEM (Gold Highlight)
+-- ESP SYSTEM
 -- ============================================================
 local espObjects = {}
-local espRunning = false
 
 function updateESP()
     if not state.ESPEnabled then
@@ -495,8 +427,8 @@ function updateESP()
                 if not obj then
                     local gui = Instance.new("BillboardGui")
                     gui.Adornee = head
-                    gui.Size = UDim2.new(0,200,0,70)
-                    gui.StudsOffset = Vector3.new(0,3,0)
+                    gui.Size = UDim2.new(0,180,0,60)
+                    gui.StudsOffset = Vector3.new(0,2.5,0)
                     gui.AlwaysOnTop = true
                     gui.Parent = head
                     local label = Instance.new("TextLabel", gui)
@@ -508,7 +440,6 @@ function updateESP()
                     label.RichText = true
                     label.TextStrokeTransparency = 0
                     label.TextColor3 = Color3.fromRGB(255,255,255)
-                    
                     local hl
                     if state.ESPHighlight then
                         hl = Instance.new("Highlight")
@@ -522,7 +453,6 @@ function updateESP()
                     espObjects[p] = {gui = gui, label = label, highlight = hl}
                     obj = espObjects[p]
                 end
-                -- Update text
                 local dist = math.floor((root.Position - myRoot.Position).Magnitude)
                 local parts = {}
                 if state.ESPName then
@@ -568,10 +498,9 @@ function updateESP()
     end
 end
 
--- ESP loop
 task.spawn(function()
     while true do
-        task.wait(0.2)
+        task.wait(0.3)
         pcall(updateESP)
     end
 end)
@@ -637,7 +566,7 @@ function startFastAttack()
 end
 
 -- ============================================================
--- WALK SPEED, DASH, NOCLIP, WALK ON WATER
+-- WALK SPEED, DASH, NOCLIP, WATER
 -- ============================================================
 task.spawn(function()
     while true do
@@ -777,7 +706,7 @@ function setAntiLava(v)
 end
 
 -- ============================================================
--- FFLAGS1 (external load)
+-- FFLAGS1
 -- ============================================================
 local fflagsThread
 function toggleFFlags(v)
@@ -809,7 +738,7 @@ player.CharacterAdded:Connect(function(char)
 end)
 
 -- ============================================================
--- PORTAL COMBOS (simplified)
+-- PORTAL COMBOS
 -- ============================================================
 function equipTool(namePattern)
     local char = player.Character
@@ -852,21 +781,15 @@ function doPortalSanguineC()
     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.C, false, game)
 end
 
--- Detect flashstep and trigger
 local function onAnimationPlayed(track)
     if not player.Character then return end
     local isFlash = track.Name:lower():find("flash") or track.Name:lower():find("soru")
     if isFlash then
-        if state.PortalSoru then
-            task.spawn(doPortalCombo)
-        end
-        if state.PortalSanguineC then
-            if state.PortalSanguineCTrigger == "Soru" then
-                task.spawn(doPortalSanguineC)
-            end
+        if state.PortalSoru then task.spawn(doPortalCombo) end
+        if state.PortalSanguineC and state.PortalSanguineCTrigger == "Soru" then
+            task.spawn(doPortalSanguineC)
         end
     end
-    -- Also detect Portal F animation
     if track.Name:lower():find("portal") or track.Name:lower():find("teleport") then
         if state.PortalSanguineC and state.PortalSanguineCTrigger == "PortalF" then
             task.spawn(doPortalSanguineC)
@@ -876,9 +799,7 @@ end
 
 player.CharacterAdded:Connect(function(char)
     local hum = char:WaitForChild("Humanoid", 5)
-    if hum then
-        hum.AnimationPlayed:Connect(onAnimationPlayed)
-    end
+    if hum then hum.AnimationPlayed:Connect(onAnimationPlayed) end
 end)
 if player.Character then
     local hum = player.Character:FindFirstChildOfClass("Humanoid")
@@ -886,7 +807,7 @@ if player.Character then
 end
 
 -- ============================================================
--- MACRO BETA (simplified)
+-- MACRO
 -- ============================================================
 local macroRunning = false
 local macroComboSlots = {
@@ -897,7 +818,6 @@ local macroComboSlots = {
     {slot = 1, key = "OFF", delay = 0.3},
     {slot = 1, key = "OFF", delay = 0.3},
 }
--- Override from state
 macroComboSlots[1] = {slot = state.MacroSlot1, key = state.MacroKey1, delay = state.MacroDelay1}
 macroComboSlots[2] = {slot = state.MacroSlot2, key = state.MacroKey2, delay = state.MacroDelay2}
 macroComboSlots[3] = {slot = state.MacroSlot3, key = state.MacroKey3, delay = state.MacroDelay3}
@@ -938,7 +858,6 @@ function executeMacro()
     macroRunning = false
 end
 
--- Trigger macro on flashstep if in Soru mode
 local function onMacroTrigger(track)
     if state.Macro and state.MacroMode == "Soru" then
         if track.Name:lower():find("flash") or track.Name:lower():find("soru") then
@@ -947,7 +866,6 @@ local function onMacroTrigger(track)
     end
 end
 
--- Hook into animation for macro
 local originalOnAnim = onAnimationPlayed
 onAnimationPlayed = function(track)
     originalOnAnim(track)
@@ -955,51 +873,65 @@ onAnimationPlayed = function(track)
 end
 
 -- ============================================================
--- UI SYSTEM (Black & Gold)
+-- UI SYSTEM (Mobile-friendly)
 -- ============================================================
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "RitualHubUI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
+-- Main Frame (draggable only via title bar)
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 450, 0, 310)
-mainFrame.Position = UDim2.new(0.5, -225, 0.5, -155)
+mainFrame.Size = UDim2.new(0, 430, 0, 300)
+mainFrame.Position = UDim2.new(0.5, -215, 0.5, -150)
 mainFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
 mainFrame.BackgroundTransparency = 0
 mainFrame.Active = true
-mainFrame.Draggable = true
+mainFrame.Draggable = false
 mainFrame.Parent = screenGui
-Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0,16)
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0,12)
 local mainStroke = Instance.new("UIStroke", mainFrame)
 mainStroke.Color = Color3.fromRGB(255,215,0)
 mainStroke.Thickness = 2
 
--- Title
-local titleLabel = Instance.new("TextLabel", mainFrame)
-titleLabel.Size = UDim2.new(0,200,0,24)
-titleLabel.Position = UDim2.new(0.5,-100,0,8)
+-- Title bar (draggable)
+local titleBar = Instance.new("Frame", mainFrame)
+titleBar.Size = UDim2.new(1,0,0,32)
+titleBar.Position = UDim2.new(0,0,0,0)
+titleBar.BackgroundColor3 = Color3.fromRGB(0,0,0)
+titleBar.BackgroundTransparency = 0
+titleBar.Active = true
+titleBar.Draggable = true
+Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0,12)
+local titleBarStroke = Instance.new("UIStroke", titleBar)
+titleBarStroke.Color = Color3.fromRGB(255,215,0)
+titleBarStroke.Thickness = 1
+titleBarStroke.Transparency = 0.5
+
+local titleLabel = Instance.new("TextLabel", titleBar)
+titleLabel.Size = UDim2.new(0,150,0,20)
+titleLabel.Position = UDim2.new(0.5,-75,0,6)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Text = "RITUAL HUB"
 titleLabel.Font = Enum.Font.GothamBlack
-titleLabel.TextSize = 16
+titleLabel.TextSize = 14
 titleLabel.TextColor3 = Color3.fromRGB(255,215,0)
 titleLabel.TextXAlignment = Enum.TextXAlignment.Center
 
-local subTitle = Instance.new("TextLabel", mainFrame)
-subTitle.Size = UDim2.new(0,150,0,14)
-subTitle.Position = UDim2.new(0.5,-75,0,32)
+local subTitle = Instance.new("TextLabel", titleBar)
+subTitle.Size = UDim2.new(0,120,0,12)
+subTitle.Position = UDim2.new(0.5,-60,0,22)
 subTitle.BackgroundTransparency = 1
 subTitle.Text = "by: ritualz999"
 subTitle.Font = Enum.Font.GothamBold
-subTitle.TextSize = 9
+subTitle.TextSize = 8
 subTitle.TextColor3 = Color3.fromRGB(255,215,0)
 subTitle.TextXAlignment = Enum.TextXAlignment.Center
 
--- Close button
-local closeBtn = Instance.new("TextButton", mainFrame)
+-- Close button (X) on title bar
+local closeBtn = Instance.new("TextButton", titleBar)
 closeBtn.Size = UDim2.new(0,24,0,24)
-closeBtn.Position = UDim2.new(1,-32,0,4)
+closeBtn.Position = UDim2.new(1,-28,0,4)
 closeBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
 closeBtn.BackgroundTransparency = 0
 closeBtn.Text = "✕"
@@ -1011,23 +943,35 @@ local closeStroke = Instance.new("UIStroke", closeBtn)
 closeStroke.Color = Color3.fromRGB(255,215,0)
 closeStroke.Thickness = 1
 closeBtn.MouseButton1Click:Connect(function()
-    screenGui:Destroy()
-    -- Clean up ESP objects
-    for _, obj in pairs(espObjects) do
-        pcall(function() obj.gui:Destroy() end)
-        pcall(function() obj.highlight:Destroy() end)
-    end
-    espObjects = {}
+    screenGui.Visible = false
+    toggleButton.Visible = true
 end)
 
--- Sidebar tabs
-local tabs = {"Stats", "Combat", "Glitches", "ESP", "Soru", "Misc"}
-local tabBtns = {}
-local pages = {}
+-- Toggle button (crown 👑)
+local toggleButton = Instance.new("TextButton", screenGui)
+toggleButton.Size = UDim2.new(0,44,0,44)
+toggleButton.Position = UDim2.new(0,10,0,10)
+toggleButton.BackgroundColor3 = Color3.fromRGB(0,0,0)
+toggleButton.BackgroundTransparency = 0
+toggleButton.Text = "👑"
+toggleButton.Font = Enum.Font.GothamBlack
+toggleButton.TextSize = 24
+toggleButton.TextColor3 = Color3.fromRGB(255,215,0)
+toggleButton.Visible = false
+Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0,8)
+local toggleStroke = Instance.new("UIStroke", toggleButton)
+toggleStroke.Color = Color3.fromRGB(255,215,0)
+toggleStroke.Thickness = 2
 
+toggleButton.MouseButton1Click:Connect(function()
+    screenGui.Visible = true
+    toggleButton.Visible = false
+end)
+
+-- Sidebar
 local sidebar = Instance.new("Frame", mainFrame)
-sidebar.Size = UDim2.new(0,90,1,-50)
-sidebar.Position = UDim2.new(0,10,0,50)
+sidebar.Size = UDim2.new(0,80,1,-36)
+sidebar.Position = UDim2.new(0,6,0,36)
 sidebar.BackgroundColor3 = Color3.fromRGB(0,0,0)
 sidebar.BackgroundTransparency = 0
 Instance.new("UICorner", sidebar).CornerRadius = UDim.new(0,8)
@@ -1035,12 +979,15 @@ local sideStroke = Instance.new("UIStroke", sidebar)
 sideStroke.Color = Color3.fromRGB(255,215,0)
 sideStroke.Thickness = 1
 
+local tabs = {"Stats", "Combat", "Glitches", "ESP", "Soru", "Misc"}
+local tabBtns = {}
+local pages = {}
+
 local pageContainer = Instance.new("Frame", mainFrame)
-pageContainer.Size = UDim2.new(1,-110,1,-55)
-pageContainer.Position = UDim2.new(0,100,0,45)
+pageContainer.Size = UDim2.new(1,-100,1,-40)
+pageContainer.Position = UDim2.new(0,88,0,38)
 pageContainer.BackgroundTransparency = 1
 
--- Create pages
 for i, name in ipairs(tabs) do
     local page = Instance.new("ScrollingFrame", pageContainer)
     page.Size = UDim2.new(1,0,1,0)
@@ -1050,19 +997,18 @@ for i, name in ipairs(tabs) do
     page.Visible = (i == 1)
     page.CanvasSize = UDim2.new(0,0,0,0)
     local layout = Instance.new("UIListLayout", page)
-    layout.Padding = UDim.new(0,6)
+    layout.Padding = UDim.new(0,4)
     layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        page.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 20)
+        page.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 10)
     end)
     pages[name] = page
 end
 
--- Tab buttons
 for i, name in ipairs(tabs) do
     local btn = Instance.new("TextButton", sidebar)
-    btn.Size = UDim2.new(1,-4,0,24)
-    btn.Position = UDim2.new(0,2,0,8 + (i-1)*28)
+    btn.Size = UDim2.new(1,-4,0,22)
+    btn.Position = UDim2.new(0,2,0,6 + (i-1)*26)
     btn.BackgroundColor3 = Color3.fromRGB(0,0,0)
     btn.BackgroundTransparency = 0
     btn.Text = name
@@ -1087,7 +1033,7 @@ for i, name in ipairs(tabs) do
 end
 
 -- ============================================================
--- UI HELPERS
+-- UI HELPERS (mobile-optimized)
 -- ============================================================
 function createCard(parent, title, height)
     local card = Instance.new("Frame", parent)
@@ -1095,14 +1041,14 @@ function createCard(parent, title, height)
     card.BackgroundColor3 = Color3.fromRGB(0,0,0)
     card.BackgroundTransparency = 0
     card.BorderSizePixel = 0
-    Instance.new("UICorner", card).CornerRadius = UDim.new(0,10)
+    Instance.new("UICorner", card).CornerRadius = UDim.new(0,8)
     local cStroke = Instance.new("UIStroke", card)
     cStroke.Color = Color3.fromRGB(255,215,0)
     cStroke.Thickness = 1
     cStroke.Transparency = 0.3
     local label = Instance.new("TextLabel", card)
-    label.Size = UDim2.new(1,0,0,20)
-    label.Position = UDim2.new(0,0,0,4)
+    label.Size = UDim2.new(1,0,0,18)
+    label.Position = UDim2.new(0,0,0,2)
     label.BackgroundTransparency = 1
     label.Text = title
     label.Font = Enum.Font.GothamBlack
@@ -1114,21 +1060,22 @@ end
 
 function addToggle(card, labelText, stateKey, yPos)
     local frame = Instance.new("Frame", card)
-    frame.Size = UDim2.new(1,-12,0,20)
-    frame.Position = UDim2.new(0,6,0,yPos)
+    frame.Size = UDim2.new(1,-8,0,20)
+    frame.Position = UDim2.new(0,4,0,yPos)
     frame.BackgroundTransparency = 1
     
     local lbl = Instance.new("TextLabel", frame)
-    lbl.Size = UDim2.new(0.65,0,1,0)
+    lbl.Size = UDim2.new(0.6,0,1,0)
     lbl.BackgroundTransparency = 1
     lbl.Text = labelText
     lbl.Font = Enum.Font.GothamBold
     lbl.TextSize = 8.5
     lbl.TextColor3 = Color3.fromRGB(255,255,255)
     lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.TextTruncate = Enum.TextTruncate.AtEnd
     
     local btn = Instance.new("TextButton", frame)
-    btn.Size = UDim2.new(0,36,0,16)
+    btn.Size = UDim2.new(0,34,0,16)
     btn.Position = UDim2.new(1,-38,0.5,-8)
     btn.BackgroundColor3 = state[stateKey] and Color3.fromRGB(255,215,0) or Color3.fromRGB(30,30,35)
     btn.BackgroundTransparency = state[stateKey] and 0.2 or 0.5
@@ -1146,21 +1093,14 @@ function addToggle(card, labelText, stateKey, yPos)
         btn.BackgroundColor3 = state[stateKey] and Color3.fromRGB(255,215,0) or Color3.fromRGB(30,30,35)
         btn.BackgroundTransparency = state[stateKey] and 0.2 or 0.5
         btn.Text = state[stateKey] and "ON" or "OFF"
-        -- Special actions
         if stateKey == "FastAttack" then
             if state.FastAttack then startFastAttack() end
-        elseif stateKey == "Noclip" then
-            setNoclip(state.Noclip)
-        elseif stateKey == "NoAnim" then
-            setNoAnim(state.NoAnim)
-        elseif stateKey == "AntiLava" then
-            setAntiLava(state.AntiLava)
-        elseif stateKey == "FFlags" then
-            toggleFFlags(state.FFlags)
-        elseif stateKey == "InfSoru" then
-            setInfSoru(state.InfSoru)
+        elseif stateKey == "Noclip" then setNoclip(state.Noclip)
+        elseif stateKey == "NoAnim" then setNoAnim(state.NoAnim)
+        elseif stateKey == "AntiLava" then setAntiLava(state.AntiLava)
+        elseif stateKey == "FFlags" then toggleFFlags(state.FFlags)
+        elseif stateKey == "InfSoru" then setInfSoru(state.InfSoru)
         elseif stateKey == "SkillAimbot" then
-            -- toggle FOV visuals
             if FOVCircle then FOVCircle.Visible = state.ShowFOV and state.SkillAimbot end
             if TargetLine then TargetLine.Visible = state.ShowLine and state.SkillAimbot end
         end
@@ -1172,21 +1112,22 @@ end
 function addStepper(card, labelText, stateKey, min, max, step, yPos, suffix)
     suffix = suffix or ""
     local frame = Instance.new("Frame", card)
-    frame.Size = UDim2.new(1,-12,0,22)
-    frame.Position = UDim2.new(0,6,0,yPos)
+    frame.Size = UDim2.new(1,-8,0,22)
+    frame.Position = UDim2.new(0,4,0,yPos)
     frame.BackgroundTransparency = 1
     
     local lbl = Instance.new("TextLabel", frame)
-    lbl.Size = UDim2.new(0.6,0,1,0)
+    lbl.Size = UDim2.new(0.5,0,1,0)
     lbl.BackgroundTransparency = 1
     lbl.Text = labelText
     lbl.Font = Enum.Font.GothamBold
     lbl.TextSize = 8.5
     lbl.TextColor3 = Color3.fromRGB(200,200,200)
     lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.TextTruncate = Enum.TextTruncate.AtEnd
     
     local valLabel = Instance.new("TextLabel", frame)
-    valLabel.Size = UDim2.new(0,45,0,18)
+    valLabel.Size = UDim2.new(0,40,0,18)
     valLabel.Position = UDim2.new(1,-90,0.5,-9)
     valLabel.BackgroundTransparency = 1
     valLabel.Text = tostring(state[stateKey])..suffix
@@ -1229,18 +1170,11 @@ function addStepper(card, labelText, stateKey, min, max, step, yPos, suffix)
         state[stateKey] = raw
         valLabel.Text = tostring(raw)..suffix
         SaveAll()
-        -- Special updates for FOV
-        if stateKey == "FOVRadius" and FOVCircle then
-            FOVCircle.Radius = raw
-        end
+        if stateKey == "FOVRadius" and FOVCircle then FOVCircle.Radius = raw end
     end
     
-    minus.MouseButton1Click:Connect(function()
-        update(state[stateKey] - step)
-    end)
-    plus.MouseButton1Click:Connect(function()
-        update(state[stateKey] + step)
-    end)
+    minus.MouseButton1Click:Connect(function() update(state[stateKey] - step) end)
+    plus.MouseButton1Click:Connect(function() update(state[stateKey] + step) end)
     return valLabel
 end
 
@@ -1248,11 +1182,11 @@ end
 -- BUILD UI PAGES
 -- ============================================================
 
--- STATS PAGE
-local statsCard, _ = createCard(pages["Stats"], "Player Profile", 170)
+-- Stats
+local statsCard, _ = createCard(pages["Stats"], "Player Profile", 140)
 local nameLabel = Instance.new("TextLabel", statsCard)
 nameLabel.Size = UDim2.new(1,0,0,18)
-nameLabel.Position = UDim2.new(0,0,0,30)
+nameLabel.Position = UDim2.new(0,0,0,24)
 nameLabel.BackgroundTransparency = 1
 nameLabel.Text = player.Name
 nameLabel.Font = Enum.Font.GothamBlack
@@ -1261,8 +1195,8 @@ nameLabel.TextColor3 = Color3.fromRGB(255,215,0)
 nameLabel.TextXAlignment = Enum.TextXAlignment.Center
 
 local levelLabel = Instance.new("TextLabel", statsCard)
-levelLabel.Size = UDim2.new(1,0,0,16)
-levelLabel.Position = UDim2.new(0,0,0,52)
+levelLabel.Size = UDim2.new(1,0,0,14)
+levelLabel.Position = UDim2.new(0,0,0,46)
 levelLabel.BackgroundTransparency = 1
 levelLabel.Text = "Level: Loading..."
 levelLabel.Font = Enum.Font.GothamBold
@@ -1271,8 +1205,8 @@ levelLabel.TextColor3 = Color3.fromRGB(200,200,200)
 levelLabel.TextXAlignment = Enum.TextXAlignment.Center
 
 local bountyLabel = Instance.new("TextLabel", statsCard)
-bountyLabel.Size = UDim2.new(1,0,0,16)
-bountyLabel.Position = UDim2.new(0,0,0,70)
+bountyLabel.Size = UDim2.new(1,0,0,14)
+bountyLabel.Position = UDim2.new(0,0,0,62)
 bountyLabel.BackgroundTransparency = 1
 bountyLabel.Text = "Bounty: Loading..."
 bountyLabel.Font = Enum.Font.GothamBold
@@ -1281,8 +1215,8 @@ bountyLabel.TextColor3 = Color3.fromRGB(200,200,200)
 bountyLabel.TextXAlignment = Enum.TextXAlignment.Center
 
 local timeLabel = Instance.new("TextLabel", statsCard)
-timeLabel.Size = UDim2.new(1,0,0,16)
-timeLabel.Position = UDim2.new(0,0,0,100)
+timeLabel.Size = UDim2.new(1,0,0,14)
+timeLabel.Position = UDim2.new(0,0,0,86)
 timeLabel.BackgroundTransparency = 1
 timeLabel.Text = "Time: 00:00:00"
 timeLabel.Font = Enum.Font.GothamBold
@@ -1291,8 +1225,8 @@ timeLabel.TextColor3 = Color3.fromRGB(200,200,200)
 timeLabel.TextXAlignment = Enum.TextXAlignment.Center
 
 local execLabel = Instance.new("TextLabel", statsCard)
-execLabel.Size = UDim2.new(1,0,0,16)
-execLabel.Position = UDim2.new(0,0,0,118)
+execLabel.Size = UDim2.new(1,0,0,14)
+execLabel.Position = UDim2.new(0,0,0,104)
 execLabel.BackgroundTransparency = 1
 execLabel.Text = "Executions: 0"
 execLabel.Font = Enum.Font.GothamBold
@@ -1300,9 +1234,8 @@ execLabel.TextSize = 10
 execLabel.TextColor3 = Color3.fromRGB(200,200,200)
 execLabel.TextXAlignment = Enum.TextXAlignment.Center
 
--- Update stats loop
-scriptStartTime = os.time()
-totalExecutions = 0
+local scriptStartTime = os.time()
+local totalExecutions = 0
 task.spawn(function()
     while true do
         task.wait(1)
@@ -1315,7 +1248,6 @@ task.spawn(function()
             end
             levelLabel.Text = "Level: "..lv
             bountyLabel.Text = "Bounty: "..bn
-            
             local elapsed = os.time() - scriptStartTime
             local h = math.floor(elapsed/3600)
             local m = math.floor((elapsed%3600)/60)
@@ -1326,66 +1258,63 @@ task.spawn(function()
     end
 end)
 
--- COMBAT PAGE
-local cCard, _ = createCard(pages["Combat"], "Aimbot Modules", 300)
-local yOff = 24
-addToggle(cCard, "Aimbot Skills", "SkillAimbot", yOff); yOff = yOff + 24
-addToggle(cCard, "Show FOV Circle", "ShowFOV", yOff); yOff = yOff + 24
-addStepper(cCard, "FOV Radius:", "FOVRadius", 20, 500, 10, yOff); yOff = yOff + 28
-addToggle(cCard, "Show Targeting Line", "ShowLine", yOff); yOff = yOff + 24
-addToggle(cCard, "Aimbot M1 (Dragon Gun) ⚠️ BAN RISK", "DragonGun", yOff); yOff = yOff + 24
-addToggle(cCard, "Target Players", "TargetPlayers", yOff); yOff = yOff + 24
-addToggle(cCard, "Target NPCs", "TargetMobs", yOff); yOff = yOff + 24
-addToggle(cCard, "Team Check", "TeamCheck", yOff); yOff = yOff + 24
-addToggle(cCard, "Ignore Safe Zone", "IgnoreSafe", yOff); yOff = yOff + 24
-addToggle(cCard, "Ignore PvP OFF", "IgnorePvPOff", yOff); yOff = yOff + 24
-addToggle(cCard, "Rainbow Body ESP", "RainbowBody", yOff); yOff = yOff + 24
-addStepper(cCard, "Max Dist:", "AimbotMaxDist", 100, 5000, 100, yOff); yOff = yOff + 28
+-- Combat
+local cCard, _ = createCard(pages["Combat"], "Aimbot Modules", 280)
+local yOff = 20
+addToggle(cCard, "Aimbot Skills", "SkillAimbot", yOff); yOff = yOff + 22
+addToggle(cCard, "Show FOV Circle", "ShowFOV", yOff); yOff = yOff + 22
+addStepper(cCard, "FOV Radius:", "FOVRadius", 20, 500, 10, yOff); yOff = yOff + 24
+addToggle(cCard, "Show Targeting Line", "ShowLine", yOff); yOff = yOff + 22
+addToggle(cCard, "Target Players", "TargetPlayers", yOff); yOff = yOff + 22
+addToggle(cCard, "Target NPCs", "TargetMobs", yOff); yOff = yOff + 22
+addToggle(cCard, "Team Check", "TeamCheck", yOff); yOff = yOff + 22
+addToggle(cCard, "Ignore Safe Zone", "IgnoreSafe", yOff); yOff = yOff + 22
+addToggle(cCard, "Ignore PvP OFF", "IgnorePvPOff", yOff); yOff = yOff + 22
+addStepper(cCard, "Max Dist:", "AimbotMaxDist", 100, 5000, 100, yOff); yOff = yOff + 24
 
-local cCard2, _ = createCard(pages["Combat"], "Fast Attack & Combat", 80)
-yOff = 24
-addToggle(cCard2, "Fast Attack", "FastAttack", yOff); yOff = yOff + 24
-addToggle(cCard2, "Walk Speed", "WalkSpeed", yOff); yOff = yOff + 24
-addStepper(cCard2, "Speed:", "WalkSpeedVal", 16, 500, 10, yOff); yOff = yOff + 28
-addToggle(cCard2, "Dash Distance", "Dash", yOff); yOff = yOff + 24
-addStepper(cCard2, "Distance:", "DashDist", 1, 300, 5, yOff); yOff = yOff + 28
-addToggle(cCard2, "Noclip", "Noclip", yOff); yOff = yOff + 24
-addToggle(cCard2, "Walk on Water", "WalkOnWater", yOff); yOff = yOff + 24
+local cCard2, _ = createCard(pages["Combat"], "Fast Attack & Combat", 120)
+yOff = 20
+addToggle(cCard2, "Fast Attack", "FastAttack", yOff); yOff = yOff + 22
+addToggle(cCard2, "Walk Speed", "WalkSpeed", yOff); yOff = yOff + 22
+addStepper(cCard2, "Speed:", "WalkSpeedVal", 16, 500, 10, yOff); yOff = yOff + 24
+addToggle(cCard2, "Dash Distance", "Dash", yOff); yOff = yOff + 22
+addStepper(cCard2, "Distance:", "DashDist", 1, 300, 5, yOff); yOff = yOff + 24
+addToggle(cCard2, "Noclip", "Noclip", yOff); yOff = yOff + 22
+addToggle(cCard2, "Walk on Water", "WalkOnWater", yOff); yOff = yOff + 22
 
--- GLITCHES PAGE
-local gCard, _ = createCard(pages["Glitches"], "Glitches", 220)
-yOff = 24
-addToggle(gCard, "Super Jump", "SuperJump", yOff); yOff = yOff + 24
-addStepper(gCard, "Jump Power:", "SuperJumpPower", 100, 1500, 50, yOff); yOff = yOff + 28
-addToggle(gCard, "No Animations", "NoAnim", yOff); yOff = yOff + 24
-addToggle(gCard, "Anti Lava", "AntiLava", yOff); yOff = yOff + 24
-addToggle(gCard, "FFlags 1", "FFlags", yOff); yOff = yOff + 24
-addToggle(gCard, "Macro Beta", "Macro", yOff); yOff = yOff + 24
+-- Glitches
+local gCard, _ = createCard(pages["Glitches"], "Glitches", 180)
+yOff = 20
+addToggle(gCard, "Super Jump", "SuperJump", yOff); yOff = yOff + 22
+addStepper(gCard, "Jump Power:", "SuperJumpPower", 100, 1500, 50, yOff); yOff = yOff + 24
+addToggle(gCard, "No Animations", "NoAnim", yOff); yOff = yOff + 22
+addToggle(gCard, "Anti Lava", "AntiLava", yOff); yOff = yOff + 22
+addToggle(gCard, "FFlags 1", "FFlags", yOff); yOff = yOff + 22
+addToggle(gCard, "Macro Beta", "Macro", yOff); yOff = yOff + 22
 
--- ESP PAGE
-local eCard, _ = createCard(pages["ESP"], "ESP & Visuals", 280)
-yOff = 24
-addToggle(eCard, "General ESP", "ESPEnabled", yOff); yOff = yOff + 24
-addToggle(eCard, "Show Name", "ESPName", yOff); yOff = yOff + 24
-addToggle(eCard, "Show Level", "ESPLevel", yOff); yOff = yOff + 24
-addToggle(eCard, "Show Bounty", "ESPBounty", yOff); yOff = yOff + 24
-addToggle(eCard, "Show Fruit", "ESPFruit", yOff); yOff = yOff + 24
-addToggle(eCard, "Show Distance", "ESPDist", yOff); yOff = yOff + 24
-addToggle(eCard, "Show HP %", "ESPHP", yOff); yOff = yOff + 24
-addToggle(eCard, "Highlight Players (Gold)", "ESPHighlight", yOff); yOff = yOff + 24
-addStepper(eCard, "Text Size:", "ESPTextSize", 8, 30, 1, yOff); yOff = yOff + 28
+-- ESP
+local eCard, _ = createCard(pages["ESP"], "ESP & Visuals", 220)
+yOff = 20
+addToggle(eCard, "General ESP", "ESPEnabled", yOff); yOff = yOff + 22
+addToggle(eCard, "Show Name", "ESPName", yOff); yOff = yOff + 22
+addToggle(eCard, "Show Level", "ESPLevel", yOff); yOff = yOff + 22
+addToggle(eCard, "Show Bounty", "ESPBounty", yOff); yOff = yOff + 22
+addToggle(eCard, "Show Fruit", "ESPFruit", yOff); yOff = yOff + 22
+addToggle(eCard, "Show Distance", "ESPDist", yOff); yOff = yOff + 22
+addToggle(eCard, "Show HP %", "ESPHP", yOff); yOff = yOff + 22
+addToggle(eCard, "Highlight (Gold)", "ESPHighlight", yOff); yOff = yOff + 22
+addStepper(eCard, "Text Size:", "ESPTextSize", 8, 30, 1, yOff); yOff = yOff + 24
 
--- SORU PAGE
-local sCard, _ = createCard(pages["Soru"], "Soru & Bypass", 220)
-yOff = 24
-addToggle(sCard, "Infinite Soru", "InfSoru", yOff); yOff = yOff + 24
-addToggle(sCard, "Soru Aimbot (TP)", "SoruAimbot", yOff); yOff = yOff + 24
-addToggle(sCard, "Portal Soru Combo", "PortalSoru", yOff); yOff = yOff + 24
-addToggle(sCard, "Portal Sanguine C Combo", "PortalSanguineC", yOff); yOff = yOff + 24
--- Trigger selector (simple toggle between PortalF and Soru)
+-- Soru
+local sCard, _ = createCard(pages["Soru"], "Soru & Bypass", 180)
+yOff = 20
+addToggle(sCard, "Infinite Soru", "InfSoru", yOff); yOff = yOff + 22
+addToggle(sCard, "Soru Aimbot", "SoruAimbot", yOff); yOff = yOff + 22
+addToggle(sCard, "Portal Soru Combo", "PortalSoru", yOff); yOff = yOff + 22
+addToggle(sCard, "Portal Sanguine C", "PortalSanguineC", yOff); yOff = yOff + 22
 local triggerBtn = Instance.new("TextButton", sCard)
-triggerBtn.Size = UDim2.new(1,-12,0,20)
-triggerBtn.Position = UDim2.new(0,6,0,yOff)
+triggerBtn.Size = UDim2.new(1,-8,0,20)
+triggerBtn.Position = UDim2.new(0,4,0,yOff)
 triggerBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
 triggerBtn.BackgroundTransparency = 0
 triggerBtn.Text = "Trigger: " .. (state.PortalSanguineCTrigger == "PortalF" and "Portal F" or "Soru")
@@ -1401,14 +1330,14 @@ triggerBtn.MouseButton1Click:Connect(function()
     triggerBtn.Text = "Trigger: " .. (state.PortalSanguineCTrigger == "PortalF" and "Portal F" or "Soru")
     SaveAll()
 end)
-yOff = yOff + 28
+yOff = yOff + 24
 
--- MISC PAGE
-local mCard, _ = createCard(pages["Misc"], "Config", 140)
-yOff = 24
+-- Misc
+local mCard, _ = createCard(pages["Misc"], "Config", 160)
+yOff = 20
 local langBtn = Instance.new("TextButton", mCard)
-langBtn.Size = UDim2.new(1,-12,0,24)
-langBtn.Position = UDim2.new(0,6,0,yOff)
+langBtn.Size = UDim2.new(1,-8,0,22)
+langBtn.Position = UDim2.new(0,4,0,yOff)
 langBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
 langBtn.BackgroundTransparency = 0
 langBtn.Text = "🌐 Language: " .. (state.Language == "EN" and "English" or "Español")
@@ -1424,11 +1353,32 @@ langBtn.MouseButton1Click:Connect(function()
     langBtn.Text = "🌐 Language: " .. (state.Language == "EN" and "English" or "Español")
     SaveAll()
 end)
-yOff = yOff + 28
+yOff = yOff + 26
+
+local fpsToggle = Instance.new("TextButton", mCard)
+fpsToggle.Size = UDim2.new(1,-8,0,22)
+fpsToggle.Position = UDim2.new(0,4,0,yOff)
+fpsToggle.BackgroundColor3 = Color3.fromRGB(0,0,0)
+fpsToggle.BackgroundTransparency = 0
+fpsToggle.Text = "📊 FPS Overlay: OFF"
+fpsToggle.Font = Enum.Font.GothamBold
+fpsToggle.TextSize = 9
+fpsToggle.TextColor3 = Color3.fromRGB(255,215,0)
+Instance.new("UICorner", fpsToggle).CornerRadius = UDim.new(0,4)
+local fpsToggleStroke = Instance.new("UIStroke", fpsToggle)
+fpsToggleStroke.Color = Color3.fromRGB(255,215,0)
+fpsToggleStroke.Thickness = 1
+fpsToggle.MouseButton1Click:Connect(function()
+    state.FPSOverlay = not state.FPSOverlay
+    fpsFrame.Visible = state.FPSOverlay
+    fpsToggle.Text = "📊 FPS Overlay: " .. (state.FPSOverlay and "ON" or "OFF")
+    SaveAll()
+end)
+yOff = yOff + 26
 
 local saveBtn = Instance.new("TextButton", mCard)
-saveBtn.Size = UDim2.new(1,-12,0,24)
-saveBtn.Position = UDim2.new(0,6,0,yOff)
+saveBtn.Size = UDim2.new(1,-8,0,22)
+saveBtn.Position = UDim2.new(0,4,0,yOff)
 saveBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
 saveBtn.BackgroundTransparency = 0
 saveBtn.Text = "💾 Save Config"
@@ -1442,15 +1392,13 @@ saveStroke.Thickness = 1
 saveBtn.MouseButton1Click:Connect(function()
     SaveAll()
     saveBtn.Text = "✅ Saved!"
-    task.delay(1.5, function()
-        saveBtn.Text = "💾 Save Config"
-    end)
+    task.delay(1.5, function() saveBtn.Text = "💾 Save Config" end)
 end)
-yOff = yOff + 28
+yOff = yOff + 26
 
 local resetBtn = Instance.new("TextButton", mCard)
-resetBtn.Size = UDim2.new(1,-12,0,24)
-resetBtn.Position = UDim2.new(0,6,0,yOff)
+resetBtn.Size = UDim2.new(1,-8,0,22)
+resetBtn.Position = UDim2.new(0,4,0,yOff)
 resetBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
 resetBtn.BackgroundTransparency = 0
 resetBtn.Text = "🔄 Reset Config"
@@ -1508,17 +1456,11 @@ resetBtn.MouseButton1Click:Connect(function()
             end
         end
     end
-    -- Clear file
     pcall(function() if isfile and isfile(configFileName) then delfile(configFileName) end end)
     SaveAll()
     resetBtn.Text = "✅ Reset Done!"
-    task.delay(1.5, function()
-        resetBtn.Text = "🔄 Reset Config"
-    end)
-    -- Reload UI by destroying and recreating? For simplicity, just restart the script.
-    screenGui:Destroy()
-    -- Re-run the script? We'll just print a message and let user re-run.
-    print("Config reset. Re-execute the script to reload UI.")
+    task.delay(1.5, function() resetBtn.Text = "🔄 Reset Config" end)
+    print("Config reset. Re-execute to reload UI fully.")
 end)
 
 -- ============================================================
@@ -1567,46 +1509,7 @@ task.spawn(function()
     end
 end)
 
--- Toggle FPS overlay via keybind? We'll add a toggle in Misc later.
--- For now, we just keep it hidden; we'll add a toggle in the UI if needed.
--- Actually we can add a toggle in Misc.
-
-local fpsToggle = Instance.new("TextButton", mCard)
-fpsToggle.Size = UDim2.new(1,-12,0,24)
-fpsToggle.Position = UDim2.new(0,6,0,yOff)
-fpsToggle.BackgroundColor3 = Color3.fromRGB(0,0,0)
-fpsToggle.BackgroundTransparency = 0
-fpsToggle.Text = "📊 FPS Overlay: OFF"
-fpsToggle.Font = Enum.Font.GothamBold
-fpsToggle.TextSize = 9
-fpsToggle.TextColor3 = Color3.fromRGB(255,215,0)
-Instance.new("UICorner", fpsToggle).CornerRadius = UDim.new(0,4)
-local fpsToggleStroke = Instance.new("UIStroke", fpsToggle)
-fpsToggleStroke.Color = Color3.fromRGB(255,215,0)
-fpsToggleStroke.Thickness = 1
-yOff = yOff + 28
-
-fpsToggle.MouseButton1Click:Connect(function()
-    state.FPSOverlay = not state.FPSOverlay
-    fpsFrame.Visible = state.FPSOverlay
-    fpsToggle.Text = "📊 FPS Overlay: " .. (state.FPSOverlay and "ON" or "OFF")
-    SaveAll()
-end)
-
--- ============================================================
--- FINAL SETUP
--- ============================================================
-print("✅ Ritual Hub loaded. Press F4 to toggle UI (if visible).")
--- Keybind to toggle UI
-UserInputService.InputBegan:Connect(function(input, gp)
-    if not gp and input.KeyCode == Enum.KeyCode.F4 then
-        mainFrame.Visible = not mainFrame.Visible
-    end
-end)
-
--- Auto-save on close? Not needed, saved on toggle changes.
-
--- Ensure settings applied on load
+-- Apply initial states
 setNoclip(state.Noclip)
 setNoAnim(state.NoAnim)
 setAntiLava(state.AntiLava)
@@ -1618,7 +1521,7 @@ if state.SkillAimbot then
     if TargetLine then TargetLine.Visible = state.ShowLine end
 end
 
--- Load macro settings from state
+-- Macro slots from state
 macroComboSlots[1] = {slot = state.MacroSlot1, key = state.MacroKey1, delay = state.MacroDelay1}
 macroComboSlots[2] = {slot = state.MacroSlot2, key = state.MacroKey2, delay = state.MacroDelay2}
 macroComboSlots[3] = {slot = state.MacroSlot3, key = state.MacroKey3, delay = state.MacroDelay3}
@@ -1626,10 +1529,7 @@ macroComboSlots[4] = {slot = state.MacroSlot4, key = state.MacroKey4, delay = st
 macroComboSlots[5] = {slot = state.MacroSlot5, key = state.MacroKey5, delay = state.MacroDelay5}
 macroComboSlots[6] = {slot = state.MacroSlot6, key = state.MacroKey6, delay = state.MacroDelay6}
 
--- Start ESP update loop
-task.spawn(function()
-    while true do
-        task.wait(0.3)
-        pcall(updateESP)
-    end
-end)
+-- ============================================================
+-- FINAL
+-- ============================================================
+print("✅ Ritual Hub (Mobile) loaded. Tap ✕ to hide, tap 👑 to show.")
