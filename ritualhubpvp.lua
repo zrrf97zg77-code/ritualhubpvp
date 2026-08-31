@@ -3070,31 +3070,22 @@ function centerAndMaximizeUI()
     }):Play()
 end
 
+-- 👑 CROWN TOGGLE BUTTON
 local openButton = Instance.new("TextButton")
 openButton.Size = UDim2.new(0, 42, 0, 42)
 openButton.Position = UDim2.new(0, 15, 0, 15)
 openButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- BLACK BACKGROUND
 openButton.BackgroundTransparency = 0
-openButton.Text = ""
+openButton.Text = "👑" -- CROWN EMOJI
+openButton.Font = Enum.Font.GothamBold
+openButton.TextSize = 24
+openButton.TextColor3 = Color3.fromRGB(255, 215, 0) -- GOLD TEXT
 openButton.Visible = false
 openButton.Active = true
 openButton.Draggable = true
 openButton.Parent = toggleIconGui
 
--- IMAGEN DE FONDO DEL TOGGLE (Muestra la foto del Wallpaper Seleccionado)
-local toggleBG = Instance.new("ImageLabel")
-toggleBG.Name = "ToggleBackground"
-toggleBG.Image = "rbxassetid://132404081379154" -- Wallpaper Anime 8 por Defecto
-toggleBG.Size = UDim2.new(1, 0, 1, 0)
-toggleBG.Position = UDim2.new(0, 0, 0, 0)
-toggleBG.BackgroundTransparency = 1
-toggleBG.ScaleType = Enum.ScaleType.Crop
-toggleBG.ZIndex = 1 
-toggleBG.Parent = openButton
-
 -- BORDES REDONDEADOS PARA LA IMAGEN (Matchea con el botón)
-Instance.new("UICorner", toggleBG).CornerRadius = UDim.new(0, 8)
-
 Instance.new("UICorner", openButton).CornerRadius = UDim.new(0, 8)
 local openStroke = Instance.new("UIStroke", openButton)
 openStroke.Thickness = 1.8
@@ -3800,7 +3791,8 @@ function addStepper(parent, labelText, yPos, minVal, maxVal, step, getter, sette
     plus.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     Instance.new("UICorner", plus).CornerRadius = UDim.new(0, 4)
     local pStroke = Instance.new("UIStroke", plus)
-    pStroke.Color = currentThemeColor -- GOLD OUTLINE    pStroke.Thickness = 1.2
+    pStroke.Color = currentThemeColor -- GOLD OUTLINE
+    pStroke.Thickness = 1.2
     table.insert(themeStrokes, pStroke)
 
     minus.MouseButton1Click:Connect(function()
